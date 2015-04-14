@@ -2,6 +2,7 @@
 from Tkinter import *
 from MancalaBoard import *
 from Player import *
+import sys
 
 class MancalaWindow:
     """# A very simple GUI for playing the game of Mancala."""
@@ -201,3 +202,38 @@ def startGame(p1, p2):
     app = MancalaWindow(root, p1, p2)
 
     root.mainloop()
+
+
+def main():
+    """
+    Calls startGame using system arguments for parameters
+    Usage: MancalaGUI.py <player_1_type> <player_2_type>"""
+    if len(sys.argv) == 1:
+        startGame(Player(1, Player.HUMAN), Player(2, Player.HUMAN))
+    elif len(sys.argv) == 3:
+        startGame(Player(1, createPlayerType(sys.argv[1])), Player(1, createPlayerType(sys.argv[2])))
+    else:
+        print "usage: MancalaGUI.py <player_1_type> <player_2_type>"
+
+
+def createPlayerType(playerType):
+    """
+    Converts a string representation of player type to an int representation
+    :param playerType: player type string
+    :return: player type int
+    """
+    playerTypeNoCase = playerType.lower()
+    if playerTypeNoCase == 'human':
+        return Player.HUMAN
+    if playerTypeNoCase == 'minimax':
+        return Player.MINIMAX
+    if playerTypeNoCase == 'random':
+        return Player.RANDOM
+    if playerTypeNoCase == 'abprune':
+        return Player.ABPRUNE
+    if playerTypeNoCase == 'custom':
+        return Player.CUSTOM
+
+
+if __name__ == '__main__':
+    main()

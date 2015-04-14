@@ -1,6 +1,6 @@
 # File: Player.py
-# Author(s) names AND netid's:
-# Date: 
+# Author(s) names AND netid's: Adam Snyder (ars123) and Steven Vorbrich (slv398)
+# Date: 17 April 2015
 # Defines a simple artificially intelligent player agent
 # You will define the alpha-beta pruning search algorithm
 # You will also define the score function in the MancalaPlayer class,
