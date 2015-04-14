@@ -177,5 +177,35 @@ class MancalaPlayer(Player):
         # function.  You should replace the line below with your own code
         # for evaluating the board
         print "Calling score in MancalaPlayer"
-        return Player.score(self, board)
+        #TODO: Hueristics
+        #Stones in mancala-stones in opponent's mancala
+        #Number of empty spaces on own side-opp (weight by number of stones in opponents adjacent thing.
+        #High or low number of stones in spots on own side (can go around or stay on the same side to end in an empty space)
+        #Having a number of stones in a space so that it can finish in own mancala
+        #Number of stones on side
+
+
+        if board.hasWon(self.num):
+            return 1000.0
+        elif board.hasWon(self.opp):
+            return -1000.0
+
+        mancalaDifferential=board.scoreCups[self.num-1]-board.scoreCups[self.num%2]
+
+        emptyCupDifferential=0
+        emptyCupCountDifferential=0
+
+        for cup in range(len(board.P1Cups)):
+            if board.P1Cups[cup]==0:
+                emptyCupDifferential+=board.P2Cups[cup]
+                emptyCupCountDifferential+=1
+        for cup in range(len(board.P2Cups)):
+            if board.P2Cups[cup]==0:
+                emptyCupDifferential-=board.P1Cups[cup]
+                emptyCupCountDifferential-=1
+        if self.num==2:
+            emptyCupDifferential*=-1
+
+
+        return mancalaDifferential+emptyCupDifferential+emptyCupCountDifferential
         
