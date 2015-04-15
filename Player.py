@@ -171,41 +171,63 @@ class MancalaPlayer(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
+    def __init__(self, playerNum, playerType, ply=0):
+        Player.__init__(self, playerNum, playerType, ply)
+        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1]
+
     def score(self, board):
         """ Evaluate the Mancala board for this player """
         # Currently this function just calls Player's score
         # function.  You should replace the line below with your own code
         # for evaluating the board
         print "Calling score in MancalaPlayer"
-        #TODO: Hueristics
-        #Stones in mancala-stones in opponent's mancala
-        #Number of empty spaces on own side-opp (weight by number of stones in opponents adjacent thing.
-        #High or low number of stones in spots on own side (can go around or stay on the same side to end in an empty space)
-        #Having a number of stones in a space so that it can finish in own mancala
-        #Number of stones on side
+        # TODO: Hueristics
+        # High or low number of stones in spots on own side (can go around or stay on the same side to end in an empty space)
+        # Having a number of stones in a space so that it can finish in own mancala
+        # Number of stones on side
+        metrics = []
 
+        def addMetric(num, playerNum):
+            """
+            Adds metric to our list of metrics
+            :param num: Value of metric
+            :param playerNum: Number of player who is benefitted
+            """
+            if playerNum == self.num:
+                metrics.append(num)
+            else:
+                metrics.append(-num)
 
+        # [0] Has player 1 won the game?
         if board.hasWon(self.num):
-            return 1000.0
-        elif board.hasWon(self.opp):
-            return -1000.0
+            addMetric(1, 1)
+        else:
+            addMetric(0, 1)
 
-        mancalaDifferential=board.scoreCups[self.num-1]-board.scoreCups[self.num%2]
+        # [1] Has player 2 won the game?
+        if board.hasWon(self.opp):
+            addMetric(1, 2)
+        else:
+            addMetric(0, 2)
 
-        emptyCupDifferential=0
-        emptyCupCountDifferential=0
+        # [2] Number of pieces in player 1's mancala
+        addMetric(board.scoreCups[0], 1)
 
-        for cup in range(len(board.P1Cups)):
-            if board.P1Cups[cup]==0:
-                emptyCupDifferential+=board.P2Cups[cup]
-                emptyCupCountDifferential+=1
-        for cup in range(len(board.P2Cups)):
-            if board.P2Cups[cup]==0:
-                emptyCupDifferential-=board.P1Cups[cup]
-                emptyCupCountDifferential-=1
-        if self.num==2:
-            emptyCupDifferential*=-1
+        # [3] Number of pieces in player 2's mancala
+        addMetric(board.scoreCups[1], 2)
 
+        # [4] Number of empty holes on player 1's side
+        addMetric(sum([1 for cup in board.P1Cups if cup == 0]), 1)
 
-        return mancalaDifferential+emptyCupDifferential+emptyCupCountDifferential
-        
+        # [5] Number of empty holes on player 2's side
+        addMetric(sum([1 for cup in board.P2Cups if cup == 0]), 2)
+
+        # [6] Number of capturable pieces on player 1's side
+        addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups)) if board.P2Cups[i] == 0]), 2)
+
+        # [7] Number of capturable pieces on player 2's side
+        addMetric(sum([board.P2Cups[i] for i in range(len(board.P1Cups)) if board.P1Cups[i] == 0]), 1)
+
+        # Return the sum of the metrics multiplied by their respective weights
+        return sum([metrics[i] * self.hueristicWeights[i] for i in range(len(metrics))])
+
