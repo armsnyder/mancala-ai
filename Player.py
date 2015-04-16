@@ -173,7 +173,7 @@ class MancalaPlayer(Player):
 
     def __init__(self, playerNum, playerType, ply=0):
         Player.__init__(self, playerNum, playerType, ply)
-        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1]
+        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1]
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
