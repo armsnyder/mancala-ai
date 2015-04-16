@@ -51,10 +51,10 @@ class TestScoring(unittest.TestCase):
         self.player2.hueristicWeights[5] = 1
         self.player2.hueristicWeights[6] = 1
         self.player2.hueristicWeights[7] = 1
-        self.assertEqual(self.board.NCUPS * 2-1, self.player2.score(self.board))
-        self.assertEqual(self.board.NCUPS * -2+1, self.player1.score(self.board))
+        self.assertEqual(0, self.player2.score(self.board))
+        self.assertEqual(0, self.player1.score(self.board))
         self.board.P1Cups = [2] * self.board.NCUPS
-        self.assertEqual(self.board.NCUPS * 3-1, self.player2.score(self.board))
-        self.assertEqual(self.board.NCUPS * -3+1, self.player1.score(self.board))
+        self.assertEqual(1, self.player2.score(self.board))
+        self.assertEqual(-1, self.player1.score(self.board))
         self.board.P1Cups = [0, 1, 0, 1, 0, 1]
-        self.assertEqual(5, self.player2.score(self.board))
+        self.assertEqual(0, self.player2.score(self.board))

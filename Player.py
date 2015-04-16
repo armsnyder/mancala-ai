@@ -173,7 +173,7 @@ class MancalaPlayer(Player):
 
     def __init__(self, playerNum, playerType, ply=0):
         Player.__init__(self, playerNum, playerType, ply)
-        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
@@ -229,10 +229,10 @@ class MancalaPlayer(Player):
         addMetric(sum([board.P2Cups[i] for i in range(board.NCUPS) if board.P1Cups[i] == 0]), 1)
 
         # [8] Number of holes on player 1's side that can finish on own side
-        addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[1] != 0 and (board.P1Cups[i] < 6-i or board.P1Cups[i]+i >= 13)]), 1)
+        addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[i] != 0 and (board.P1Cups[i] < 6-i or board.P1Cups[i]+i >= 13)]), 1)
 
         # [9] Number of holes on player 2's side that can finish on own side
-        addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[1] != 0 and (board.P2Cups[i] < 6-i or board.P2Cups[i]+i >= 13)]), 2)
+        addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] != 0 and (board.P2Cups[i] < 6-i or board.P2Cups[i]+i >= 13)]), 2)
 
         # [10] Number of stones on a side (player 1)
         addMetric(sum([board.P1Cups[i] for i in range(board.NCUPS)]), 1)
