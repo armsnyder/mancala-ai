@@ -173,7 +173,7 @@ class MancalaPlayer(Player):
 
     def __init__(self, playerNum, playerType, ply=0):
         Player.__init__(self, playerNum, playerType, ply)
-        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1]
+        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1]
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
@@ -227,6 +227,10 @@ class MancalaPlayer(Player):
 
         # [7] Number of capturable pieces on player 2's side
         addMetric(sum([board.P2Cups[i] for i in range(len(board.P1Cups)) if board.P1Cups[i] == 0]), 1)
+
+        #[8] Number of stones on a side (player 1 and 2)
+        addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups))]), 1)
+        addMetric(sum([board.P2Cups[i] for i in range(len(board.P2Cups))]), 2)
 
         # Return the sum of the metrics multiplied by their respective weights
         return sum([metrics[i] * self.hueristicWeights[i] for i in range(len(metrics))])
