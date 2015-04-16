@@ -223,10 +223,23 @@ class MancalaPlayer(Player):
         addMetric(sum([1 for cup in board.P2Cups if cup == 0]), 2)
 
         # [6] Number of capturable pieces on player 1's side
-        addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups)) if board.P2Cups[i] == 0]), 2)
+        addMetric(sum([board.P1Cups[i] for i in range(board.NCUPS) if board.P2Cups[i] == 0]), 2)
 
         # [7] Number of capturable pieces on player 2's side
-        addMetric(sum([board.P2Cups[i] for i in range(len(board.P1Cups)) if board.P1Cups[i] == 0]), 1)
+        addMetric(sum([board.P2Cups[i] for i in range(board.NCUPS) if board.P1Cups[i] == 0]), 1)
+
+        # [8] Number of holes on player 1's side that can finish on own side
+        addMetric(sum([1 for i in range(len(board.P1Cups)) if board.P1Cups[1]<>0 and (board.P1Cups[i]<6-i or board.P1Cups[i]+i>=13)]), 1)
+
+        # [9] Number of holes on player 2's side that can finish on own side
+        addMetric(sum([1 for i in range(len(board.P2Cups)) if board.P2Cups[1]<>0 and (board.P2Cups[i]<6-i or board.P2Cups[i]+i>=13)]), 2)
+
+        # [12] Number plays that would result in an extra turn for player 1
+        addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[i] == board.NCUPS-i]), 1)
+
+        # [13] Number plays that would result in an extra turn for player 2
+        addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] == board.NCUPS-i]), 2)
+
 
         #[8] Number of stones on a side (player 1 and 2)
         addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups))]), 1)
