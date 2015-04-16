@@ -234,6 +234,12 @@ class MancalaPlayer(Player):
         # [9] Number of holes on player 2's side that can finish on own side
         addMetric(sum([1 for i in range(len(board.P2Cups)) if board.P2Cups[1]<>0 and (board.P2Cups[i]<6-i or board.P2Cups[i]+i>=13)]), 2)
 
+        #[10] Number of stones on a side (player 1)
+        addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups))]), 1)
+
+        #[11] Number of stones on a side (player 2)
+        addMetric(sum([board.P2Cups[i] for i in range(len(board.P2Cups))]), 2)
+
         # [12] Number plays that would result in an extra turn for player 1
         addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[i] == board.NCUPS-i]), 1)
 
@@ -241,9 +247,6 @@ class MancalaPlayer(Player):
         addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] == board.NCUPS-i]), 2)
 
 
-        #[8] Number of stones on a side (player 1 and 2)
-        addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups))]), 1)
-        addMetric(sum([board.P2Cups[i] for i in range(len(board.P2Cups))]), 2)
 
         # Return the sum of the metrics multiplied by their respective weights
         return sum([metrics[i] * self.hueristicWeights[i] for i in range(len(metrics))])
