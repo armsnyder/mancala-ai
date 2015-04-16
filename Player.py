@@ -1,5 +1,5 @@
 # File: Player.py
-# Author(s) names AND netid's: Adam Snyder (ars123) and Steven Vorbrich (slv398)
+# Author(s) names AND netid's: Michael Nowakowski (mjn912), Adam Snyder (ars123) and Steven Vorbrich (slv398)
 # Date: 17 April 2015
 # Defines a simple artificially intelligent player agent
 # You will define the alpha-beta pruning search algorithm
@@ -191,7 +191,7 @@ class MancalaPlayer(Player):
             """
             Adds metric to our list of metrics
             :param num: Value of metric
-            :param playerNum: Number of player who is benefitted
+            :param playerNum: Number of player who is benefited
             """
             if playerNum == self.num:
                 metrics.append(num)
