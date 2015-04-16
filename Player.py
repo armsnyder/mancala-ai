@@ -223,10 +223,16 @@ class MancalaPlayer(Player):
         addMetric(sum([1 for cup in board.P2Cups if cup == 0]), 2)
 
         # [6] Number of capturable pieces on player 1's side
-        addMetric(sum([board.P1Cups[i] for i in range(len(board.P1Cups)) if board.P2Cups[i] == 0]), 2)
+        addMetric(sum([board.P1Cups[i] for i in range(board.NCUPS) if board.P2Cups[i] == 0]), 2)
 
         # [7] Number of capturable pieces on player 2's side
-        addMetric(sum([board.P2Cups[i] for i in range(len(board.P1Cups)) if board.P1Cups[i] == 0]), 1)
+        addMetric(sum([board.P2Cups[i] for i in range(board.NCUPS) if board.P1Cups[i] == 0]), 1)
+
+        # [12] Number plays that would result in an extra turn for player 1
+        addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[i] == board.NCUPS-i]), 1)
+
+        # [13] Number plays that would result in an extra turn for player 2
+        addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] == board.NCUPS-i]), 2)
 
         # Return the sum of the metrics multiplied by their respective weights
         return sum([metrics[i] * self.hueristicWeights[i] for i in range(len(metrics))])
