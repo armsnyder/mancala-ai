@@ -143,7 +143,7 @@ class Player:
             # make a new board
             nb.makeMove(self, m)
             # try the move
-            opp = Player(self.opp, self.type, self.ply)
+            opp = MancalaPlayer(self.opp, self.type, self.ply)
             s = self._alphaBetaHelper(nb, ply-1, -INFINITY, INFINITY, self, opp, 'min')
             # and see what the opponent would do next
             if s > score:

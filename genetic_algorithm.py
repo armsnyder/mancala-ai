@@ -2,13 +2,13 @@
 # Example usage
 from genetic import *
 target = 371
-p_count = 100
+p_count = 99
 i_length = 6
 i_min = 0
-i_max = 100
+i_max = 99
 p = population(p_count, i_length, i_min, i_max)
 fitness_history = [grade(p, target),]
-for i in xrange(100):
+for i in xrange(99):
     p = evolve(p, target)
     fitness_history.append(grade(p, target))
 
@@ -16,7 +16,7 @@ for datum in fitness_history:
    print datum
 """
 from random import randint, random
-from operator import add
+import threading
 import time
 
 import MancalaBoard
@@ -42,37 +42,61 @@ def population(count, length, min, max):
 
 
 def sortPlayers(players):
+    print 'NEW ROUND'
     gamesWon = [0]*len(players)
     for p1 in range(len(players)):
         for p2 in range(p1+1, len(players)):
-            game = MancalaBoard.MancalaBoard()
             player_1 = Player.MancalaPlayer(1, Player.Player.ABPRUNE, 6, players[p1])
             player_2 = Player.MancalaPlayer(2, Player.Player.ABPRUNE, 6, players[p2])
-            winner = game.hostGame(player_1, player_2)
-            if winner == 1:
-                gamesWon[p1] += 1
-            elif winner == 2:
-                gamesWon[p2] += 1
-            else:
-                gamesWon[p1] += 0.5
-                gamesWon[p2] += 0.5
-    return [item[1] for item in sorted(zip(gamesWon, players), reverse=True)]
+            print time.strftime('%H:%M:%S')+': Starting', p1, 'v', p2
+            threading.Thread(target=runGame, args=(player_1, p1, player_2, p2, gamesWon)).start()
+    main_thread = threading.currentThread()
+    for t in threading.enumerate():
+        if t is not main_thread:
+            t.join()
+    return sorted(zip(gamesWon, players), reverse=True)
 
 
-def evolve(pop, i_min, i_max, retain=0.3, random_select=0.05, mutate=0.1):
-    graded = sortPlayers(pop)
+def runGame(player_1, p1, player_2, p2, gamesWon):
+    game = MancalaBoard.MancalaBoard()
+    winner = game.hostGame(player_1, player_2)
+    if winner == 1:
+        gamesWon[p1] += 1
+    elif winner == 2:
+        gamesWon[p2] += 1
+    else:
+        gamesWon[p1] += 0.5
+        gamesWon[p2] += 0.5
+    print time.strftime('%H:%M:%S')+': Finished', p1, 'v', p2
+
+
+def evolve(pop, i_min, i_max, pop_size, retain=0.3, random_select=0.05, mutate=0.2):
+
+    # If input population is skimpy, start with some crossover
+    if len(pop) < pop_size:
+        addChildren(pop, pop_size, mutate, i_min, i_max)
+
+    sortedPlayers = sortPlayers(pop)
+    graded = [item[1] for item in sortedPlayers]
     retain_length = int(len(graded)*retain)
     parents = graded[:retain_length]
-    save2(graded)
+    save(sortedPlayers)
 
     # randomly add other individuals to promote genetic diversity
     for i in graded[retain_length:]:
         if random_select > random():
             parents.append(i)
 
+    # crossover and mutate
+    addChildren(parents, pop_size, mutate, i_min, i_max)
+
+    return parents
+
+
+def addChildren(parents, pop_size, mutate, i_min, i_max):
     # crossover parents to create children
     parents_length = len(parents)
-    desired_length = len(pop) - parents_length
+    desired_length = pop_size - parents_length
     children = []
     while len(children) < desired_length:
         male = randint(0, parents_length-1)
@@ -84,60 +108,34 @@ def evolve(pop, i_min, i_max, retain=0.3, random_select=0.05, mutate=0.1):
             for i in range(len(male)):
                 weight = random()
                 child.append(weight*male[i]+(1-weight)*female[i])
+            # mutate some individuals
+            if mutate > random():
+                pos_to_mutate = randint(0, len(child)-1)
+                child[pos_to_mutate] = randint(i_min, i_max)
             children.append(child)
     parents.extend(children)
 
-    # mutate some individuals
-    mutated_parents = []
-    for i in parents:
-        if mutate > random():
-            pos_to_mutate = randint(0, len(i)-1)
-            i[pos_to_mutate] = randint(i_min, i_max)
-        mutated_parents.append(i)
 
-    return mutated_parents
-
-
-def save(parent):
-    max_amount = max([abs(item) for item in parent])
+def save(sortedPlayers):
+    total = str(len(sortedPlayers))
     with open('genetic_history.txt', 'a') as f:
-            f.write(str([int(item*100/max_amount) for item in parent])+'\n')
-
-
-def save2(graded):
-    total = str(len(graded))
-    with open('genetic_history.txt', 'a') as f:
-        f.write(time.strftime('%H:%M:%S'))
-        for m in graded:
-            line = str(m[0])+'/'+total+': '+str(m[1])
+        f.write(time.strftime('%H:%M:%S')+'\n')
+        for m in sortedPlayers:
+            line = str(round(m[0], 1))+'/'+total+':  ['+', '.join([str(int(item)).zfill(2) for item in m[1]])+']'
             f.write(line+'\n')
         f.write('\n')
 
 
 def main():
-    initial_pop = [
-        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+    p = [
+        [95, 99, 71, 79, 47, 74, 24, 62, 53, 98, 81, 49, 50, 77, 79, 56],
+        [56, 99, 00, 52, 25, 75, 81, 59, 43, 98, 64, 54, 23, 00, 01, 57],
+        [80, 99, 19, 85, 71, 17, 76, 27, 61, 97, 71, 53, 85, 48, 06, 47]
     ]
-    pop_num = 8
-    i_length = 16
-    i_min = -100
-    i_max = 100
-    evolutions = 10000
-    # p = population(pop_num, i_length, i_min, i_max)
-    p = initial_pop
-    for i in xrange(evolutions):
-        # p = evolve(p, i_min, i_max)
-        p = evolve(p, 0, 1, mutate=0)
-        if i == evolutions-1:
-            p = evolve(p, i_min, i_max, mutate=0)
-            p = evolve(p, i_min, i_max, mutate=0)
+    i_min = 0
+    i_max = 99
+    while True:
+        p = evolve(p, i_min, i_max, 10)
 
 
 if __name__ == '__main__':
