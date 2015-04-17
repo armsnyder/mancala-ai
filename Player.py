@@ -182,11 +182,7 @@ class MancalaPlayer(Player):
         # function.  You should replace the line below with your own code
         # for evaluating the board
         print "Calling score in MancalaPlayer"
-        # TODO: Hueristics
-        # High or low number of stones in spots on own side (can go around or stay on the same side to end in an empty space)
-        # Having a number of stones in a space so that it can finish in own mancala
-        # Number of stones on side
-        metrics = []
+        metrics = [[], []]
 
         def addMetric(num, playerNum):
             """
@@ -195,9 +191,9 @@ class MancalaPlayer(Player):
             :param playerNum: Number of player who is benefited
             """
             if playerNum == self.num:
-                metrics.append(num)
+                metrics[0].append(num)
             else:
-                metrics.append(-num)
+                metrics[1].append(num)
 
         # [0] Has player 1 won the game?
         if board.hasWon(1):
@@ -270,5 +266,5 @@ class MancalaPlayer(Player):
         addMetric(max(possibilities or [0, 0]), 2)
 
         # Return the sum of the metrics multiplied by their respective weights
-        return sum([metrics[i] * self.hueristicWeights[i] for i in range(len(metrics))])
-
+        return sum([metrics[0][i] * self.hueristicWeights[i] for i in range(len(metrics[0]))]) - \
+            sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))])

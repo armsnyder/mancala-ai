@@ -25,7 +25,7 @@ class TestScoring(unittest.TestCase):
         self.assertEqual(0, self.player1.score(self.board))
         self.assertEqual(0, self.player2.score(self.board))
         self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        self.player2.hueristicWeights = [1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.player2.hueristicWeights = [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]
         self.assertEqual(0, self.player1.score(self.board))
         self.assertEqual(0, self.player2.score(self.board))
         self.board.scoreCups[0] = 1
@@ -73,7 +73,7 @@ class TestScoring(unittest.TestCase):
         self.board.P1Cups = [0, 0, 0, 0, 0, 0]
         self.board.P2Cups = [0, 0, 0, 0, 0, 0]
         self.board.scoreCups = [46, 2]
-        self.player1.hueristicWeights = [100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        self.player2.hueristicWeights = [100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.player1.hueristicWeights = [100, 1, 1, 1, 1, 1, 1, 1, 100, 1, 1, 1, 1, 1, 1, 1]
+        self.player2.hueristicWeights = [100, 1, 1, 1, 1, 1, 1, 1, 100, 1, 1, 1, 1, 1, 1, 1]
         self.assertEqual(144, self.player1.score(self.board))
         self.assertEqual(-144, self.player2.score(self.board))
