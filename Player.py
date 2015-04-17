@@ -171,9 +171,10 @@ class MancalaPlayer(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
-    def __init__(self, playerNum, playerType, ply=0):
+    def __init__(self, playerNum, playerType, ply=0,
+                 hueristicWeights=(1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)):
         Player.__init__(self, playerNum, playerType, ply)
-        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.hueristicWeights = hueristicWeights
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
