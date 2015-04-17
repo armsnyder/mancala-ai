@@ -133,7 +133,8 @@ def main():
     # p = population(pop_num, i_length, i_min, i_max)
     p = initial_pop
     for i in xrange(evolutions):
-        p = evolve(p, i_min, i_max)
+        # p = evolve(p, i_min, i_max)
+        p = evolve(mutate=0)
         if i == evolutions-1:
             p = evolve(p, i_min, i_max, mutate=0)
             p = evolve(p, i_min, i_max, mutate=0)
