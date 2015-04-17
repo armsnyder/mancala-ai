@@ -17,6 +17,7 @@ for datum in fitness_history:
 """
 from random import randint, random
 from operator import add
+import time
 
 import MancalaBoard
 import Player
@@ -106,6 +107,7 @@ def save(parent):
 def save2(graded):
     total = str(len(graded))
     with open('genetic_history.txt', 'a') as f:
+        f.write(time.strftime('%H:%M:%S'))
         for m in graded:
             line = str(m[0])+'/'+total+': '+str(m[1])
             f.write(line+'\n')
