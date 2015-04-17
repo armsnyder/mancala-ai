@@ -129,9 +129,53 @@ class Player:
     # and/or a different move search order.
     def alphaBetaMove(self, board, ply):
         """ Choose a move with alpha beta pruning.  Returns (score, move) """
-        print "Alpha Beta Move not yet implemented"
-        #returns the score adn the associated moved
-        return (-1,1)
+        # returns the score and the associated moved
+        move = -1
+        score = -INFINITY
+        for m in board.legalMoves(self):
+            # for each legal move
+            if ply == 0:
+                # if we're at ply 0, we need to call our eval function & return
+                return self.score(board), m
+            if board.gameOver():
+                return -1, -1  # Can't make a move, the game is over
+            nb = deepcopy(board)
+            # make a new board
+            nb.makeMove(self, m)
+            # try the move
+            opp = Player(self.opp, self.type, self.ply)
+            s = self._alphaBetaHelper(nb, ply-1, -INFINITY, INFINITY, self, opp, 'min')
+            # and see what the opponent would do next
+            if s > score:
+                # if the result is better than our best score so far, save that move,score
+                move = m
+                score = s
+        # return the best score and move so far
+        return score, move
+
+    def _alphaBetaHelper(self, board, ply, alpha, beta, us, opponent, which_player):
+        if ply == 0 or board.gameOver():
+            return us.score(board)
+        if which_player == 'max':
+            v = -INFINITY
+            for move in board.legalMoves(us):
+                nb = deepcopy(board)
+                nb.makeMove(us, move)
+                v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                alpha = max(alpha, v)
+                if beta <= alpha:
+                    break
+            return v
+        else:
+            v = INFINITY
+            for move in board.legalMoves(opponent):
+                nb = deepcopy(board)
+                nb.makeMove(opponent, move)
+                v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                alpha = min(beta, v)
+                if beta <= alpha:
+                    break
+            return v
                 
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
@@ -172,7 +216,7 @@ class MancalaPlayer(Player):
         intelligently """
 
     def __init__(self, playerNum, playerType, ply=0,
-                 hueristicWeights=(1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)):
+                 hueristicWeights=(97, 63, 27, 36, 86, 53, 9, 54, 100, 86, 71, 26, 66, 85, 18, 0)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
 
@@ -181,7 +225,7 @@ class MancalaPlayer(Player):
         # Currently this function just calls Player's score
         # function.  You should replace the line below with your own code
         # for evaluating the board
-        print "Calling score in MancalaPlayer"
+        # print "Calling score in MancalaPlayer"
         metrics = [[], []]
 
         def addMetric(num, playerNum):

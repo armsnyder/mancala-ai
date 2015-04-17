@@ -77,3 +77,35 @@ class TestScoring(unittest.TestCase):
         self.player2.hueristicWeights = [100, 1, 1, 1, 1, 1, 1, 1, 100, 1, 1, 1, 1, 1, 1, 1]
         self.assertEqual(144, self.player1.score(self.board))
         self.assertEqual(-144, self.player2.score(self.board))
+
+
+class TestAlphaBeta(unittest.TestCase):
+
+    def setUp(self):
+        self.board = MancalaBoard.MancalaBoard()
+        self.player1 = Player.MancalaPlayer(1, Player.Player.MINIMAX, 3)
+        self.player2 = Player.MancalaPlayer(2, Player.Player.ABPRUNE, 3)
+
+    def testFirstMove(self):
+        self.board.reset()
+        player1_score, player1_move = self.player1.minimaxMove(self.board, 1)
+        self.board.reset()
+        player2_score, player2_move = self.player2.alphaBetaMove(self.board, 1)
+        self.assertEqual(player1_move, player2_move)
+        self.assertEqual(player1_score, player2_score)
+
+    def testSecondMove(self):
+        self.board.reset()
+        player1_score, player1_move = self.player1.minimaxMove(self.board, 2)
+        self.board.reset()
+        player2_score, player2_move = self.player2.alphaBetaMove(self.board, 2)
+        self.assertEqual(player1_move, player2_move)
+        self.assertEqual(player1_score, player2_score)
+
+    def testThirdMove(self):
+        self.board.reset()
+        player1_score, player1_move = self.player1.minimaxMove(self.board, 3)
+        self.board.reset()
+        player2_score, player2_move = self.player2.alphaBetaMove(self.board, 3)
+        self.assertEqual(player1_move, player2_move)
+        self.assertEqual(player1_score, player2_score)
