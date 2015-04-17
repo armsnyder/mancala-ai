@@ -45,8 +45,8 @@ def sortPlayers(players):
     for p1 in range(len(players)):
         for p2 in range(p1+1, len(players)):
             game = MancalaBoard.MancalaBoard()
-            player_1 = Player.MancalaPlayer(1, Player.Player.MINIMAX, 2, players[p1])
-            player_2 = Player.MancalaPlayer(2, Player.Player.MINIMAX, 2, players[p2])
+            player_1 = Player.MancalaPlayer(1, Player.Player.ABPRUNE, 6, players[p1])
+            player_2 = Player.MancalaPlayer(2, Player.Player.ABPRUNE, 6, players[p2])
             winner = game.hostGame(player_1, player_2)
             if winner == 1:
                 gamesWon[p1] += 1
@@ -58,11 +58,11 @@ def sortPlayers(players):
     return [item[1] for item in sorted(zip(gamesWon, players), reverse=True)]
 
 
-def evolve(pop, i_min, i_max, retain=0.2, random_select=0.05, mutate=0.01):
+def evolve(pop, i_min, i_max, retain=0.3, random_select=0.05, mutate=0.1):
     graded = sortPlayers(pop)
     retain_length = int(len(graded)*retain)
     parents = graded[:retain_length]
-    save(parents)
+    save2(graded)
 
     # randomly add other individuals to promote genetic diversity
     for i in graded[retain_length:]:
@@ -97,19 +97,44 @@ def evolve(pop, i_min, i_max, retain=0.2, random_select=0.05, mutate=0.01):
     return mutated_parents
 
 
-def save(parents):
+def save(parent):
+    max_amount = max([abs(item) for item in parent])
     with open('genetic_history.txt', 'a') as f:
-            f.write(str(parents[0])+'\n')
+            f.write(str([int(item*100/max_amount) for item in parent])+'\n')
+
+
+def save2(graded):
+    total = str(len(graded))
+    with open('genetic_history.txt', 'a') as f:
+        for m in graded:
+            line = str(m[0])+'/'+total+': '+str(m[1])
+            f.write(line+'\n')
+        f.write('\n')
 
 
 def main():
-    pop_num = 10
+    initial_pop = [
+        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
+    ]
+    pop_num = 8
     i_length = 16
-    i_min = 0
+    i_min = -100
     i_max = 100
-    p = population(pop_num, i_length, i_min, i_max)
-    for i in xrange(100):
+    evolutions = 10000
+    # p = population(pop_num, i_length, i_min, i_max)
+    p = initial_pop
+    for i in xrange(evolutions):
         p = evolve(p, i_min, i_max)
+        if i == evolutions-1:
+            p = evolve(p, i_min, i_max, mutate=0)
+            p = evolve(p, i_min, i_max, mutate=0)
 
 
 if __name__ == '__main__':
