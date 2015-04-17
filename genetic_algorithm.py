@@ -1,44 +1,9 @@
-"""
-# Example usage
-from genetic import *
-target = 371
-p_count = 99
-i_length = 6
-i_min = 0
-i_max = 99
-p = population(p_count, i_length, i_min, i_max)
-fitness_history = [grade(p, target),]
-for i in xrange(99):
-    p = evolve(p, target)
-    fitness_history.append(grade(p, target))
-
-for datum in fitness_history:
-   print datum
-"""
 from random import randint, random
 import threading
 import time
 
 import MancalaBoard
 import Player
-
-
-def individual(length, min, max):
-    """Create a member of the population."""
-    return [randint(min, max) for x in xrange(length)]
-
-
-def population(count, length, min, max):
-    """
-    Create a number of individuals (i.e. a population).
-
-    count: the number of individuals in the population
-    length: the number of values per individual
-    min: the minimum possible value in an individual's list of values
-    max: the maximum possible value in an individual's list of values
-
-    """
-    return [individual(length, min, max) for x in xrange(count)]
 
 
 def sortPlayers(players):
