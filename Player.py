@@ -199,13 +199,13 @@ class MancalaPlayer(Player):
                 metrics.append(-num)
 
         # [0] Has player 1 won the game?
-        if board.hasWon(self.num):
+        if board.hasWon(1):
             addMetric(1, 1)
         else:
             addMetric(0, 1)
 
         # [1] Has player 2 won the game?
-        if board.hasWon(self.opp):
+        if board.hasWon(2):
             addMetric(1, 2)
         else:
             addMetric(0, 2)
@@ -249,15 +249,24 @@ class MancalaPlayer(Player):
         addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] == board.NCUPS-i]), 2)
 
         # [14] Max number of stones capturable in this turn for player 1
-        addMetric((max([board.P2Cups[board.NCUPS-i-1] for i in range(board.NCUPS)
-                        if (0 < board.P1Cups[i] <= 13) and (board.P1Cups[i]+i) % 13 < 6
-                        and (board.P1Cups[(board.P1Cups[i]+i) % 13] == 0 or board.P1Cups[i] == 13)] or [0, 0])), 1)
+        possibilities = []
+        for i in range(board.NCUPS):
+            numPieces = board.P1Cups[i]
+            extraPieces = (numPieces+i)/13
+            landingPosition = (numPieces+i) % 13
+            if (0 < numPieces < 14) and landingPosition < 6 and (board.P1Cups[landingPosition] == 0 or numPieces == 13):
+                possibilities.append(1 + board.P2Cups[board.NCUPS-landingPosition-1] + extraPieces)
+        addMetric(max(possibilities or [0, 0]), 1)
 
         # [15] Max number of stones capturable in this turn for player 2
-        addMetric((max([board.P1Cups[board.NCUPS-i-1] for i in range(board.NCUPS)
-                        if (0 < board.P2Cups[i] <= 13) and (board.P2Cups[i]+i) % 13 < 6
-                        and (board.P2Cups[(board.P2Cups[i]+i) % 13] == 0 or board.P2Cups[i] == 13)] or [0, 0])), 2)
-
+        possibilities = []
+        for i in range(board.NCUPS):
+            numPieces = board.P2Cups[i]
+            extraPieces = (numPieces+i)/13
+            landingPosition = (numPieces+i) % 13
+            if (0 < numPieces < 14) and landingPosition < 6 and (board.P2Cups[landingPosition] == 0 or numPieces == 13):
+                possibilities.append(1 + board.P1Cups[board.NCUPS-landingPosition-1] + extraPieces)
+        addMetric(max(possibilities or [0, 0]), 2)
 
         # Return the sum of the metrics multiplied by their respective weights
         return sum([metrics[i] * self.hueristicWeights[i] for i in range(len(metrics))])
