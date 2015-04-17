@@ -58,3 +58,10 @@ class TestScoring(unittest.TestCase):
         self.assertEqual(-1, self.player1.score(self.board))
         self.board.P1Cups = [0, 1, 0, 1, 0, 1]
         self.assertEqual(0, self.player2.score(self.board))
+
+    def testSumore(self):
+        pass
+
+    def testPlayerOne(self):
+        self.board.P1Cups = [0, 3, 0, 1, 0, 2]
+        self.board.P2Cups = [0, 4, 0, 3, 2, 8]

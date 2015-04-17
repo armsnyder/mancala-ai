@@ -173,7 +173,7 @@ class MancalaPlayer(Player):
 
     def __init__(self, playerNum, playerType, ply=0):
         Player.__init__(self, playerNum, playerType, ply)
-        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.hueristicWeights = [1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
@@ -229,10 +229,12 @@ class MancalaPlayer(Player):
         addMetric(sum([board.P2Cups[board.NCUPS-i-1] for i in range(board.NCUPS) if board.P1Cups[i] == 0]), 1)
 
         # [8] Number of holes on player 1's side that can finish on own side
-        addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[i] != 0 and (board.P1Cups[i] < 6-i or board.P1Cups[i]+i >= 13)]), 1)
+        addMetric(sum([1 for i in range(board.NCUPS)
+                       if board.P1Cups[i] != 0 and (board.P1Cups[i] < 6-i or board.P1Cups[i]+i >= 13)]), 1)
 
         # [9] Number of holes on player 2's side that can finish on own side
-        addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] != 0 and (board.P2Cups[i] < 6-i or board.P2Cups[i]+i >= 13)]), 2)
+        addMetric(sum([1 for i in range(board.NCUPS)
+                       if board.P2Cups[i] != 0 and (board.P2Cups[i] < 6-i or board.P2Cups[i]+i >= 13)]), 2)
 
         # [10] Number of stones on a side (player 1)
         addMetric(sum([board.P1Cups[i] for i in range(board.NCUPS)]), 1)
@@ -247,10 +249,14 @@ class MancalaPlayer(Player):
         addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] == board.NCUPS-i]), 2)
 
         # [14] Max number of stones capturable in this turn for player 1
-        addMetric((max([board.P2Cups[board.NCUPS-i-1] for i in range(board.NCUPS) if board.P1Cups[i] == 0])), 1)
+        addMetric((max([board.P2Cups[board.NCUPS-i-1] for i in range(board.NCUPS)
+                        if (0 < board.P1Cups[i] <= 13) and (board.P1Cups[i]+i) % 13 < 6
+                        and (board.P1Cups[(board.P1Cups[i]+i) % 13] == 0 or board.P1Cups[i] == 13)] or [0, 0])), 1)
 
-        # [15] Max number of stones capturable in this turn for player 1
-        addMetric((max([board.P1Cups[board.NCUPS-i-1] for i in range(board.NCUPS) if board.P2Cups[i] == 0])), 1)
+        # [15] Max number of stones capturable in this turn for player 2
+        addMetric((max([board.P1Cups[board.NCUPS-i-1] for i in range(board.NCUPS)
+                        if (0 < board.P2Cups[i] <= 13) and (board.P2Cups[i]+i) % 13 < 6
+                        and (board.P2Cups[(board.P2Cups[i]+i) % 13] == 0 or board.P2Cups[i] == 13)] or [0, 0])), 2)
 
 
         # Return the sum of the metrics multiplied by their respective weights
