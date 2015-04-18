@@ -18,14 +18,9 @@ class TestScoring(unittest.TestCase):
         self.player1 = Player.MancalaPlayer(1, Player.Player.CUSTOM)
         self.player2 = Player.MancalaPlayer(2, Player.Player.CUSTOM)
 
-    def testScoreBasic(self):
-        self.assertEqual(0, self.player1.score(self.board))
-
     def testScoreMancalas(self):
-        self.assertEqual(0, self.player1.score(self.board))
-        self.assertEqual(0, self.player2.score(self.board))
-        self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        self.player2.hueristicWeights = [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]
+        self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.player2.hueristicWeights = [2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]
         self.assertEqual(0, self.player1.score(self.board))
         self.assertEqual(0, self.player2.score(self.board))
         self.board.scoreCups[0] = 1
@@ -36,10 +31,8 @@ class TestScoring(unittest.TestCase):
         self.assertEqual(18, self.player2.score(self.board))
 
     def testScoreEmptyCups(self):
-        self.assertEqual(0, self.player2.score(self.board))
         self.board.P1Cups = [0] * self.board.NCUPS
         self.board.P2Cups = [0] * self.board.NCUPS
-        self.assertEqual(0, self.player2.score(self.board))
         self.board.P1Cups = [1] * self.board.NCUPS
         self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.player2.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -73,10 +66,10 @@ class TestScoring(unittest.TestCase):
         self.board.P1Cups = [0, 0, 0, 0, 0, 0]
         self.board.P2Cups = [0, 0, 0, 0, 0, 0]
         self.board.scoreCups = [46, 2]
-        self.player1.hueristicWeights = [100, 1, 1, 1, 1, 1, 1, 1, 100, 1, 1, 1, 1, 1, 1, 1]
-        self.player2.hueristicWeights = [100, 1, 1, 1, 1, 1, 1, 1, 100, 1, 1, 1, 1, 1, 1, 1]
-        self.assertEqual(144, self.player1.score(self.board))
-        self.assertEqual(-144, self.player2.score(self.board))
+        self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.player2.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        self.assertEqual(Player.WINNING_SCORE, self.player1.score(self.board))
+        self.assertEqual(Player.LOSING_SCORE, self.player2.score(self.board))
 
 
 class TestAlphaBeta(unittest.TestCase):

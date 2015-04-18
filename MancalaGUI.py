@@ -211,7 +211,7 @@ def main():
     if len(sys.argv) == 1:
         startGame(MancalaPlayer(1, Player.HUMAN), MancalaPlayer(2, Player.HUMAN))
     elif len(sys.argv) == 3:
-        startGame(MancalaPlayer(1, createPlayerType(sys.argv[1]), 6), MancalaPlayer(2, createPlayerType(sys.argv[2]), 6, (100, 1, 1, 1, 1, 1, 1, 1, 100, 1, 1, 1, 1, 1, 1, 1)))
+        startGame(MancalaPlayer(1, createPlayerType(sys.argv[1])), MancalaPlayer(2, createPlayerType(sys.argv[2])))
     else:
         print "usage: MancalaGUI.py <player_1_type> <player_2_type>"
 

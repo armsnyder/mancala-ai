@@ -35,7 +35,7 @@ def runGame(player_1, p1, player_2, p2, gamesWon):
     print time.strftime('%H:%M:%S')+': Finished', p1, 'v', p2
 
 
-def evolve(pop, i_min, i_max, pop_size, retain=0.3, random_select=0.05, mutate=0.2):
+def evolve(pop, i_min, i_max, pop_size, retain=0.3, random_select=0.05, mutate=0.3):
 
     # If input population is skimpy, start with some crossover
     if len(pop) < pop_size:
@@ -82,20 +82,20 @@ def addChildren(parents, pop_size, mutate, i_min, i_max):
 
 
 def save(sortedPlayers):
-    total = str(len(sortedPlayers))
     with open('genetic_history.txt', 'a') as f:
         f.write(time.strftime('%H:%M:%S')+'\n')
         for m in sortedPlayers:
-            line = str(round(m[0], 1))+'/'+total+':  ['+', '.join([str(int(item)).zfill(2) for item in m[1]])+']'
+            line = str(round(m[0], 1))+' / 9.0:  ['+', '.join([str(int(item)).zfill(2) for item in m[1]])+']'
             f.write(line+'\n')
         f.write('\n')
 
 
 def main():
     p = [
-        [95, 99, 71, 79, 47, 74, 24, 62, 53, 98, 81, 49, 50, 77, 79, 56],
-        [56, 99, 00, 52, 25, 75, 81, 59, 43, 98, 64, 54, 23, 00, 01, 57],
-        [80, 99, 19, 85, 71, 17, 76, 27, 61, 97, 71, 53, 85, 48, 06, 47]
+        [99, 41, 11, 51, 65, 40, 46, 97, 66, 54, 48, 42, 55, 45],
+        [99, 41, 47, 49, 65, 40, 46, 97, 66, 54, 47, 83, 50, 45],
+        [99, 41, 13, 51, 65, 44, 46, 97, 66, 54, 46, 42, 49, 45],
+        [99, 50, 11, 51, 65, 45, 46, 99, 66, 40, 48, 50, 55, 45],
     ]
     i_min = 0
     i_max = 99

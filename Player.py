@@ -14,6 +14,8 @@ from MancalaBoard import *
 
 # a constant
 INFINITY = 1.0e400
+WINNING_SCORE = 1.0e10
+LOSING_SCORE = -1.0e10
 
 class Player:
     """ A basic AI (or human) player """
@@ -144,7 +146,7 @@ class Player:
             nb.makeMove(self, m)
             # try the move
             opp = MancalaPlayer(self.opp, self.type, self.ply)
-            s = self._alphaBetaHelper(nb, ply-1, -INFINITY, INFINITY, self, opp, 'min')
+            s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
             # and see what the opponent would do next
             if s > score:
                 # if the result is better than our best score so far, save that move,score
@@ -215,8 +217,8 @@ class MancalaPlayer(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
-    def __init__(self, playerNum, playerType, ply=0,
-                 hueristicWeights=(97, 63, 27, 36, 86, 53, 9, 54, 100, 86, 71, 26, 66, 85, 18, 0)):
+    def __init__(self, playerNum, playerType, ply=7,
+                 hueristicWeights=(99, 41, 11, 51, 65, 40, 46, 97, 66, 54, 48, 42, 55, 45)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
 
@@ -239,57 +241,52 @@ class MancalaPlayer(Player):
             else:
                 metrics[1].append(num)
 
-        # [0] Has player 1 won the game?
-        if board.hasWon(1):
-            addMetric(1, 1)
-        else:
-            addMetric(0, 1)
+        # Is the game over? No need to estimate
+        if board.gameOver():
+            if board.scoreCups[self.num-1] > board.scoreCups[self.opp-1]:
+                return WINNING_SCORE
+            elif board.scoreCups[self.num-1] < board.scoreCups[self.opp-1]:
+                return LOSING_SCORE
 
-        # [1] Has player 2 won the game?
-        if board.hasWon(2):
-            addMetric(1, 2)
-        else:
-            addMetric(0, 2)
-
-        # [2] Number of pieces in player 1's mancala
+        # [0] Number of pieces in player 1's mancala
         addMetric(board.scoreCups[0], 1)
 
-        # [3] Number of pieces in player 2's mancala
+        # [7] Number of pieces in player 2's mancala
         addMetric(board.scoreCups[1], 2)
 
-        # [4] Number of empty holes on player 1's side
+        # [1] Number of empty holes on player 1's side
         addMetric(sum([1 for cup in board.P1Cups if cup == 0]), 1)
 
-        # [5] Number of empty holes on player 2's side
+        # [8] Number of empty holes on player 2's side
         addMetric(sum([1 for cup in board.P2Cups if cup == 0]), 2)
 
-        # [6] Number of capturable pieces on player 1's side
+        # [9] Number of capturable pieces on player 1's side
         addMetric(sum([board.P1Cups[board.NCUPS-i-1] for i in range(board.NCUPS) if board.P2Cups[i] == 0]), 2)
 
-        # [7] Number of capturable pieces on player 2's side
+        # [2] Number of capturable pieces on player 2's side
         addMetric(sum([board.P2Cups[board.NCUPS-i-1] for i in range(board.NCUPS) if board.P1Cups[i] == 0]), 1)
 
-        # [8] Number of holes on player 1's side that can finish on own side
+        # [3] Number of holes on player 1's side that can finish on own side
         addMetric(sum([1 for i in range(board.NCUPS)
                        if board.P1Cups[i] != 0 and (board.P1Cups[i] < 6-i or board.P1Cups[i]+i >= 13)]), 1)
 
-        # [9] Number of holes on player 2's side that can finish on own side
+        # [10] Number of holes on player 2's side that can finish on own side
         addMetric(sum([1 for i in range(board.NCUPS)
                        if board.P2Cups[i] != 0 and (board.P2Cups[i] < 6-i or board.P2Cups[i]+i >= 13)]), 2)
 
-        # [10] Number of stones on a side (player 1)
+        # [4] Number of stones on a side (player 1)
         addMetric(sum([board.P1Cups[i] for i in range(board.NCUPS)]), 1)
 
         # [11] Number of stones on a side (player 2)
         addMetric(sum([board.P2Cups[i] for i in range(board.NCUPS)]), 2)
 
-        # [12] Number plays that would result in an extra turn for player 1
+        # [5] Number plays that would result in an extra turn for player 1
         addMetric(sum([1 for i in range(board.NCUPS) if board.P1Cups[i] == board.NCUPS-i]), 1)
 
-        # [13] Number plays that would result in an extra turn for player 2
+        # [12] Number plays that would result in an extra turn for player 2
         addMetric(sum([1 for i in range(board.NCUPS) if board.P2Cups[i] == board.NCUPS-i]), 2)
 
-        # [14] Max number of stones capturable in this turn for player 1
+        # [6] Max number of stones capturable in this turn for player 1
         possibilities = []
         for i in range(board.NCUPS):
             numPieces = board.P1Cups[i]
@@ -299,7 +296,7 @@ class MancalaPlayer(Player):
                 possibilities.append(1 + board.P2Cups[board.NCUPS-landingPosition-1] + extraPieces)
         addMetric(max(possibilities or [0, 0]), 1)
 
-        # [15] Max number of stones capturable in this turn for player 2
+        # [13] Max number of stones capturable in this turn for player 2
         possibilities = []
         for i in range(board.NCUPS):
             numPieces = board.P2Cups[i]
