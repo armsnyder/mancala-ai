@@ -217,8 +217,8 @@ class MancalaPlayer(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
-    def __init__(self, playerNum, playerType, ply=7,
-                 hueristicWeights=(99, 41, 11, 51, 65, 40, 46, 97, 66, 54, 48, 42, 55, 45)):
+    def __init__(self, playerNum, playerType, ply=8,
+                 hueristicWeights=(99, 48, 11, 49, 64, 45, 26, 71, 62, 43, 47, 69, 58, 45)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
 
@@ -309,3 +309,68 @@ class MancalaPlayer(Player):
         # Return the sum of the metrics multiplied by their respective weights
         return sum([metrics[0][i] * self.hueristicWeights[i] for i in range(len(metrics[0]))]) - \
             sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))])
+
+    def _alphaBetaHelper(self, board, ply, alpha, beta, us, opponent, which_player):
+        if ply == 0 or board.gameOver():
+            return us.score(board), -1
+        if which_player == 'max':
+            v = -INFINITY
+            m = -1
+            for move in board.legalMoves(us):
+                v_temp = v
+                nb = deepcopy(board)
+                nb.makeMove(us, move)
+                if self.num == 1:
+                    if board.P1Cups[move-1] == board.NCUPS-move+1:
+                        # print 'BURP'
+                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
+                    else:
+                        # print 'BURP'
+                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
+                else:
+                    if board.P2Cups[move-1] == board.NCUPS-move+1:
+                        # if ply > 6:
+                            # print 'AI: Turn '+str(9-ply)+' Move '+str(move)
+                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
+                    else:
+                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
+                alpha = max(alpha, v)
+                if v_temp != v:
+                    m = move
+                if beta <= alpha:
+                    break
+            return v, m
+        else:
+            v = INFINITY
+            m = -1
+            for move in board.legalMoves(opponent):
+                v_temp = v
+                nb = deepcopy(board)
+                nb.makeMove(opponent, move)
+                if self.num == 1:
+                    if board.P2Cups[move-1] == board.NCUPS-move+1:
+                        # print 'BURP'
+                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
+                    else:
+                        # print 'BURP'
+                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
+                else:
+                    if board.P1Cups[move-1] == board.NCUPS-move+1:
+                        # if ply > 6:
+                            # print 'HUMAN: Turn '+str(9-ply)+' Move '+str(move)
+                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
+                    else:
+                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
+                alpha = min(beta, v)
+                if v_temp != v:
+                    m = move
+                if beta <= alpha:
+                    break
+            return v, m
+
+    def alphaBetaMove(self, board, ply):
+        """ Choose a move with alpha beta pruning.  Returns (score, move) """
+        # returns the score and the associated moved
+        v, m = self._alphaBetaHelper(board, ply, LOSING_SCORE, WINNING_SCORE, self,
+                                     MancalaPlayer(self.opp, self.type, self.ply), 'max')
+        return v, m
