@@ -481,7 +481,7 @@ class slv398(Player):
             val = -INFINITY
             for ply in range(7, MAX_PLY):
                 print 'RUNNING WITH DEPTH '+str(ply)
-                val_temp, move_temp, terminate = self.searchTree(board, self.ply, startTime)
+                val_temp, move_temp, terminate = self.searchTree(board, ply, startTime)
                 if terminate:
                     break
                 else:
@@ -534,9 +534,12 @@ class slv398(Player):
             return us.score(board), False
         if which_player == 'max':
             v = LOSING_SCORE
+            scoredMoves = []
             for move in board.legalMoves(us):
                 nb = deepcopy(board)
                 again = nb.makeMove(us, move)
+                scoredMoves.append((again, move, nb))
+            for again, move, nb in sorted(scoredMoves, reverse=True):
                 if again:
                     nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max', startTime)
                     v = max(v, nodeScore)
@@ -549,9 +552,12 @@ class slv398(Player):
             return v, terminate
         else:
             v = WINNING_SCORE
+            scoredMoves = []
             for move in board.legalMoves(opponent):
                 nb = deepcopy(board)
                 again = nb.makeMove(opponent, move)
+                scoredMoves.append((again, move, nb))
+            for again, move, nb in sorted(scoredMoves, reverse=True):
                 if again:
                     nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min', startTime)
                     if not terminate:
