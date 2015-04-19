@@ -22,7 +22,7 @@ class TTTBoard:
         return move in self.legalMoves(player)
 
     def legalMoves( self, player ):
-        """ Returns the legal moves reminaing for the player in question"""
+        """ Returns the legal moves remaining for the player in question"""
         moves = []
         for m in range( len(self.board)):
             if self.board[m] == ' ':
