@@ -305,16 +305,15 @@ class Player:
                 return -1, -1  # Can't make a move, the game is over
             nb = deepcopy(board)
 
-
             # make a new board
             again = nb.makeMove(self, m)
             # try the move
-            opp = MancalaPlayer(self.opp, self.type, self.ply)
+            opp = Player(self.opp, self.type, self.ply)
             print again
             if again:
-                s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max')
+                s = self._alphaBetaHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max')
             else:
-                s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
+                s = self._alphaBetaHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
             # and see what the opponent would do next
             if s > score:
                 # if the result is better than our best score so far, save that move,score
@@ -332,9 +331,9 @@ class Player:
                 nb = deepcopy(board)
                 again = nb.makeMove(us, move)
                 if again:
-                    v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                    v = max(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
                 else:
-                    v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                    v = max(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 alpha = max(alpha, v)
                 if beta <= alpha:
                     break
@@ -345,9 +344,9 @@ class Player:
                 nb = deepcopy(board)
                 again = nb.makeMove(opponent, move)
                 if again:
-                    v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                    v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 else:
-                    v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                    v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
                 alpha = min(beta, v)
                 if beta <= alpha:
                     break
@@ -473,14 +472,85 @@ class MancalaPlayer(Player):
             print "chose move", move, " with value", val
             return move
         elif self.type == self.CUSTOM:
-            startTime = time.time()
-            for ply in range(20):
-                val, move = self.searchTree(board, ply, startTime)
+            val, move = self.abPruneBonus(board, self.ply)
             print "chose move", move, " with value", val
             return move
+            # MAX_PLY = 20
+            # startTime = time.time()
+            # move = -1
+            # val = -INFINITY
+            # for ply in range(1, MAX_PLY):
+            #     val_temp, move_temp, terminate = self.searchTree(board, self.ply, startTime)
+            #     if terminate:
+            #         break
+            #     else:
+            #         move = move_temp
+            #         val = val_temp
+            # print "chose move", move, " with value", val
+            # return move
         else:
             print "Unknown player type"
             return -1
 
     def searchTree(self, board, ply, startTime):
-        return 1, 2
+        """ Choose a move with alpha beta pruning.  Returns (score, move) """
+        # returns the score and the associated moved
+        print 'Searching tree...'
+        move = -1
+        score = -INFINITY
+        for m in board.legalMoves(self):
+            # for each legal move
+            if ply == 0:
+                # if we're at ply 0, we need to call our eval function & return
+                return self.score(board), m
+            if board.gameOver():
+                return -1, -1  # Can't make a move, the game is over
+
+            # make a new board
+            nb = deepcopy(board)
+            again = nb.makeMove(self, m)
+            # try the move
+            opp = MancalaPlayer(self.opp, self.type, self.ply, self.hueristicWeights)
+            print again
+            if again:
+                s = self._searchTreeHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max')
+            else:
+                s = self._searchTreeHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
+            # and see what the opponent would do next
+            if s > score:
+                # if the result is better than our best score so far, save that move,score
+                move = m
+                score = s
+        # return the best score and move so far
+        terminate = False
+        return score, move, terminate
+
+    def _searchTreeHelperBonus(self, board, ply, alpha, beta, us, opponent, which_player):
+        if ply == 0 or board.gameOver():
+            return us.score(board)
+        if which_player == 'max':
+            v = LOSING_SCORE
+            for move in board.legalMoves(us):
+                nb = deepcopy(board)
+                again = nb.makeMove(us, move)
+                if again:
+                    v = max(v, self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                else:
+                    v = max(v, self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                alpha = max(alpha, v)
+                if beta <= alpha:
+                    break
+            return v
+        else:
+            v = WINNING_SCORE
+            for move in board.legalMoves(opponent):
+                nb = deepcopy(board)
+                again = nb.makeMove(opponent, move)
+                if again:
+                    v = min(v, self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                else:
+                    v = min(v, self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                alpha = min(beta, v)
+                if beta <= alpha:
+                    break
+            return v

@@ -236,4 +236,8 @@ def createPlayerType(playerType):
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    p1 = MancalaPlayer(1, Player.ABPRUNE, 7, [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
+    p2 = MancalaPlayer(2, Player.CUSTOM, 7, [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
+    board = MancalaBoard()
+    startGame(p1, p2)
