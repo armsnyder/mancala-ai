@@ -2,6 +2,7 @@ import unittest
 
 import Player
 import MancalaBoard
+import TicTacToe
 
 
 class TestExample(unittest.TestCase):
@@ -102,3 +103,5 @@ class TestAlphaBeta(unittest.TestCase):
         player2_score, player2_move = self.player2.alphaBetaMove(self.board, 3)
         self.assertEqual(player1_move, player2_move)
         self.assertEqual(player1_score, player2_score)
+
+

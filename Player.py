@@ -51,10 +51,14 @@ class Player:
                 return (-1, -1)  # Can't make a move, the game is over
             nb = deepcopy(board)
             #make a new board
-            nb.makeMove(self, m)
+            again = nb.makeMove(self, m)
             #try the move
             opp = Player(self.opp, self.type, self.ply)
-            s = opp.minValue(nb, ply-1, turn)
+            if again:
+                s = self.maxValue(nb, ply-1, turn)
+            else:
+                s = opp.minValue(nb, ply-1, turn)
+
             #and see what the opponent would do next
             if s > score:
                 #if the result is better than our best score so far, save that move,score
@@ -77,8 +81,12 @@ class Player:
             opponent = Player(self.opp, self.type, self.ply)
             # Copy the board so that we don't ruin it
             nextBoard = deepcopy(board)
-            nextBoard.makeMove(self, m)
-            s = opponent.minValue(nextBoard, ply-1, turn)
+            again = nextBoard.makeMove(self, m)
+            if again:
+                s = self.maxValue(nextBoard, ply-1, turn)
+            else:
+                s = opponent.minValue(nextBoard, ply-1, turn)
+
             #print "s in maxValue is: " + str(s)
             if s > score:
                 score = s
@@ -98,8 +106,11 @@ class Player:
             opponent = Player(self.opp, self.type, self.ply)
             # Copy the board so that we don't ruin it
             nextBoard = deepcopy(board)
-            nextBoard.makeMove(self, m)
-            s = opponent.maxValue(nextBoard, ply-1, turn)
+            again = nextBoard.makeMove(self, m)
+            if again:
+                s = self.minValue(nextBoard, ply-1, turn)
+            else:
+                s = opponent.maxValue(nextBoard, ply-1, turn)
             #print "s in minValue is: " + str(s)
             if s < score:
                 score = s
@@ -142,11 +153,17 @@ class Player:
             if board.gameOver():
                 return -1, -1  # Can't make a move, the game is over
             nb = deepcopy(board)
+
+
             # make a new board
-            nb.makeMove(self, m)
+            again = nb.makeMove(self, m)
             # try the move
             opp = MancalaPlayer(self.opp, self.type, self.ply)
-            s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
+            print again
+            if again:
+                s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max')
+            else:
+                s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
             # and see what the opponent would do next
             if s > score:
                 # if the result is better than our best score so far, save that move,score
@@ -162,8 +179,11 @@ class Player:
             v = -INFINITY
             for move in board.legalMoves(us):
                 nb = deepcopy(board)
-                nb.makeMove(us, move)
-                v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                again = nb.makeMove(us, move)
+                if again:
+                    v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                else:
+                    v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 alpha = max(alpha, v)
                 if beta <= alpha:
                     break
@@ -172,13 +192,16 @@ class Player:
             v = INFINITY
             for move in board.legalMoves(opponent):
                 nb = deepcopy(board)
-                nb.makeMove(opponent, move)
-                v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                again = nb.makeMove(opponent, move)
+                if again:
+                    v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                else:
+                    v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
                 alpha = min(beta, v)
                 if beta <= alpha:
                     break
             return v
-                
+
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
         if self.type == self.HUMAN:
@@ -210,6 +233,17 @@ class Player:
         else:
             print "Unknown player type"
             return -1
+
+
+class TTPlayer(Player):
+    def tt_score(self, board):
+        """ Returns the score for this player given the state of the board """
+        if board.hasWon(self.num):
+            return 100.0
+        elif board.hasWon(self.opp):
+            return 0.0
+        else:
+            return 50.0
 
 
 # Note, you should change the name of this player to be your netid
