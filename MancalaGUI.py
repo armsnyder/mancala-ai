@@ -1,7 +1,7 @@
 
 from Tkinter import *
 from MancalaBoard import *
-from Player import *
+from slv398 import *
 import sys
 
 class MancalaWindow:
@@ -209,9 +209,9 @@ def main():
     Calls startGame using system arguments for parameters
     Usage: MancalaGUI.py <player_1_type> <player_2_type>"""
     if len(sys.argv) == 1:
-        startGame(MancalaPlayer(1, Player.HUMAN), MancalaPlayer(2, Player.HUMAN))
+        startGame(slv398(1, Player.HUMAN), slv398(2, Player.HUMAN))
     elif len(sys.argv) == 3:
-        startGame(MancalaPlayer(1, createPlayerType(sys.argv[1])), MancalaPlayer(2, createPlayerType(sys.argv[2])))
+        startGame(slv398(1, createPlayerType(sys.argv[1])), slv398(2, createPlayerType(sys.argv[2])))
     else:
         print "usage: MancalaGUI.py <player_1_type> <player_2_type>"
 
@@ -237,7 +237,7 @@ def createPlayerType(playerType):
 
 if __name__ == '__main__':
     # main()
-    p1 = MancalaPlayer(1, Player.ABPRUNE, 7, [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
-    p2 = MancalaPlayer(2, Player.CUSTOM, 7, [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
+    p1 = slv398(1, Player.HUMAN)
+    p2 = slv398(2, Player.CUSTOM)
     board = MancalaBoard()
     startGame(p1, p2)

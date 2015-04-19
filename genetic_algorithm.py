@@ -3,7 +3,7 @@ import threading
 import time
 
 import MancalaBoard
-import Player
+import slv398
 
 
 def sortPlayers(players):
@@ -11,8 +11,8 @@ def sortPlayers(players):
     gamesWon = [0]*len(players)
     for p1 in range(len(players)):
         for p2 in range(p1+1, len(players)):
-            player_1 = Player.MancalaPlayer(1, Player.Player.ABPRUNE, 6, players[p1])
-            player_2 = Player.MancalaPlayer(2, Player.Player.ABPRUNE, 6, players[p2])
+            player_1 = slv398.slv398(1, slv398.Player.ABPRUNE, 6, players[p1])
+            player_2 = slv398.slv398(2, slv398.Player.ABPRUNE, 6, players[p2])
             print time.strftime('%H:%M:%S')+': Starting', p1, 'v', p2
             threading.Thread(target=runGame, args=(player_1, p1, player_2, p2, gamesWon)).start()
     main_thread = threading.currentThread()
