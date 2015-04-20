@@ -11,8 +11,8 @@ def sortPlayers(players):
     gamesWon = [0]*len(players)
     for p1 in range(len(players)):
         for p2 in range(p1+1, len(players)):
-            player_1 = slv398.slv398(1, slv398.Player.ABPRUNE, 6, players[p1])
-            player_2 = slv398.slv398(2, slv398.Player.ABPRUNE, 6, players[p2])
+            player_1 = slv398.slv398(1, slv398.Player.ABPRUNE, 5, players[p1][:14], players[p1][14:])
+            player_2 = slv398.slv398(2, slv398.Player.ABPRUNE, 5, players[p2][:14], players[p2][14:])
             print time.strftime('%H:%M:%S')+': Starting', p1, 'v', p2
             threading.Thread(target=runGame, args=(player_1, p1, player_2, p2, gamesWon)).start()
     main_thread = threading.currentThread()
@@ -27,11 +27,11 @@ def runGame(player_1, p1, player_2, p2, gamesWon):
     winner = game.hostGame(player_1, player_2)
     if winner == 1:
         gamesWon[p1] += 1
-    # elif winner == 2:
-    #     gamesWon[p2] += 1
-    # else:
-    #     gamesWon[p1] += 0.5
-    #     gamesWon[p2] += 0.5
+    elif winner == 2:
+        gamesWon[p2] += 1
+    else:
+        gamesWon[p1] += 0.5
+        gamesWon[p2] += 0.5
     print time.strftime('%H:%M:%S')+': Finished', p1, 'v', p2
 
 
@@ -91,9 +91,8 @@ def save(sortedPlayers):
 
 def main():
     p = [
-        [90, 33, 16, 97, 24, 47, 8, 65, 28, 64, 67, 23, 69, 32],
-        [99, 48, 12, 49, 65, 43, 46, 97, 66, 43, 47, 69, 52, 45],
-        [50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50]
+        [90, 33, 16, 97, 24, 47, 8, 65, 28, 64, 67, 23, 69, 32, 90, 33, 16, 97, 24, 47, 8, 65, 28, 64, 67, 23, 69, 32],
+        [50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50]
     ]
     i_min = 0
     i_max = 99

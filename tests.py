@@ -21,7 +21,7 @@ class TestScoring(unittest.TestCase):
 
     def testScoreMancalas(self):
         self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        self.player2.hueristicWeights = [2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]
+        self.player2.hueristicWeights2 = [2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]
         self.assertEqual(0, self.player1.score(self.board))
         self.assertEqual(0, self.player2.score(self.board))
         self.board.scoreCups[0] = 1
@@ -111,6 +111,6 @@ class TestAlphaBeta(unittest.TestCase):
         self.player1 = slv398.slv398(1, slv398.Player.CUSTOM)
         self.player2 = slv398.slv398(2, slv398.Player.CUSTOM)
         self.player1.hueristicWeights = [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
-        self.player2.hueristicWeights = [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+        self.player2.hueristicWeights2 = [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
         self.assertEqual(-1, self.player1.searchTree(self.board, 6, time.time())[0])
         self.assertEqual(slv398.WINNING_SCORE, self.player2.searchTree(self.board, 6, time.time())[0])

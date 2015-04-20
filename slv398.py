@@ -359,9 +359,11 @@ class slv398(Player):
         intelligently """
 
     def __init__(self, playerNum, playerType, ply=7,
-                 hueristicWeights=(99, 48, 11, 49, 64, 45, 26, 71, 62, 43, 47, 69, 58, 45)):
+                 hueristicWeights=(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+                 hueristicWeights2=(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
+        self.hueristicWeights2 = hueristicWeights2
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
@@ -446,8 +448,12 @@ class slv398(Player):
         addMetric(max(possibilities or [0, 0]), 2)
 
         # Return the sum of the metrics multiplied by their respective weights
-        return sum([metrics[0][i] * self.hueristicWeights[i] for i in range(len(metrics[0]))]) - \
-            sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))])
+        if self.num == 1:
+            return sum([metrics[0][i] * self.hueristicWeights[i] for i in range(len(metrics[0]))]) - \
+                sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))])
+        else:
+            return sum([metrics[0][i] * self.hueristicWeights2[i] for i in range(len(metrics[0]))]) - \
+                sum([metrics[1][i] * self.hueristicWeights2[i+len(metrics[1])] for i in range(len(metrics[1]))])
 
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
@@ -473,11 +479,13 @@ class slv398(Player):
             # val, move = self.abPruneBonus(board, self.ply)
             # print "chose move", move, " with value", val
             # return move
-            MAX_PLY = 20
             startTime = time.time()
             move = -1
             val = -INFINITY
-            for ply in range(7, MAX_PLY):
+            startPly = 10
+            if startPly > self.ply:
+                startPly = self.ply
+            for ply in range(startPly, self.ply+1):
                 print 'RUNNING WITH DEPTH '+str(ply)
                 val_temp, move_temp, terminate = self.searchTree(board, ply, startTime)
                 if terminate:
