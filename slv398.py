@@ -10,6 +10,7 @@
 from random import *
 from decimal import *
 from copy import *
+import time
 from MancalaBoard import *
 
 # a constant
@@ -145,7 +146,7 @@ class Player:
             # make a new board
             nb.makeMove(self, m)
             # try the move
-            opp = MancalaPlayer(self.opp, self.type, self.ply)
+            opp = slv398(self.opp, self.type, self.ply)
             s = self._alphaBetaHelper(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
             # and see what the opponent would do next
             if s > score:
@@ -211,13 +212,153 @@ class Player:
             print "Unknown player type"
             return -1
 
+    def minimaxBonus(self, board, ply):
+        """ Choose the best minimax move.  Returns (score, move) """
+        move = -1
+        score = -INFINITY
+        turn = self
+        for m in board.legalMoves(self):
+            #for each legal move
+            if ply == 0:
+                #if we're at ply 0, we need to call our eval function & return
+                return (self.score(board), m)
+            if board.gameOver():
+                return (-1, -1)  # Can't make a move, the game is over
+            nb = deepcopy(board)
+            #make a new board
+            again = nb.makeMove(self, m)
+            #try the move
+            opp = Player(self.opp, self.type, self.ply)
+            if again:
+                s = self.maxValueBonus(nb, ply-1, turn)
+            else:
+                s = opp.minValueBonus(nb, ply-1, turn)
+
+            #and see what the opponent would do next
+            if s > score:
+                #if the result is better than our best score so far, save that move,score
+                move = m
+                score = s
+        #return the best score and move so far
+        return score, move
+
+    def maxValueBonus(self, board, ply, turn):
+        """ Find the minimax value for the next move for this player
+        at a given board configuation. Returns score."""
+        if board.gameOver():
+            return turn.score(board)
+        score = -INFINITY
+        for m in board.legalMoves(self):
+            if ply == 0:
+                #print "turn.score(board) in max value is: " + str(turn.score(board))
+                return turn.score(board)
+            # make a new player to play the other side
+            opponent = Player(self.opp, self.type, self.ply)
+            # Copy the board so that we don't ruin it
+            nextBoard = deepcopy(board)
+            again = nextBoard.makeMove(self, m)
+            if again:
+                s = self.maxValueBonus(nextBoard, ply-1, turn)
+            else:
+                s = opponent.minValueBonus(nextBoard, ply-1, turn)
+
+            #print "s in maxValue is: " + str(s)
+            if s > score:
+                score = s
+        return score
+
+    def minValueBonus(self, board, ply, turn):
+        """ Find the minimax value for the next move for this player
+            at a given board configuation. Returns score."""
+        if board.gameOver():
+            return turn.score(board)
+        score = INFINITY
+        for m in board.legalMoves(self):
+            if ply == 0:
+                #print "turn.score(board) in min Value is: " + str(turn.score(board))
+                return turn.score(board)
+            # make a new player to play the other side
+            opponent = Player(self.opp, self.type, self.ply)
+            # Copy the board so that we don't ruin it
+            nextBoard = deepcopy(board)
+            again = nextBoard.makeMove(self, m)
+            if again:
+                s = self.minValueBonus(nextBoard, ply-1, turn)
+            else:
+                s = opponent.maxValueBonus(nextBoard, ply-1, turn)
+            #print "s in minValue is: " + str(s)
+            if s < score:
+                score = s
+        return score
+
+    def abPruneBonus(self, board, ply):
+        """ Choose a move with alpha beta pruning.  Returns (score, move) """
+        # returns the score and the associated moved
+        move = -1
+        score = -INFINITY
+        for m in board.legalMoves(self):
+            # for each legal move
+            if ply == 0:
+                # if we're at ply 0, we need to call our eval function & return
+                return self.score(board), m
+            if board.gameOver():
+                return -1, -1  # Can't make a move, the game is over
+            nb = deepcopy(board)
+
+            # make a new board
+            again = nb.makeMove(self, m)
+            # try the move
+            opp = Player(self.opp, self.type, self.ply)
+            print again
+            if again:
+                s = self._alphaBetaHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max')
+            else:
+                s = self._alphaBetaHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min')
+            # and see what the opponent would do next
+            if s > score:
+                # if the result is better than our best score so far, save that move,score
+                move = m
+                score = s
+        # return the best score and move so far
+        return score, move
+
+    def _alphaBetaHelperBonus(self, board, ply, alpha, beta, us, opponent, which_player):
+        if ply == 0 or board.gameOver():
+            return us.score(board)
+        if which_player == 'max':
+            v = -INFINITY
+            for move in board.legalMoves(us):
+                nb = deepcopy(board)
+                again = nb.makeMove(us, move)
+                if again:
+                    v = max(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                else:
+                    v = max(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                alpha = max(alpha, v)
+                if beta <= alpha:
+                    break
+            return v
+        else:
+            v = INFINITY
+            for move in board.legalMoves(opponent):
+                nb = deepcopy(board)
+                again = nb.makeMove(opponent, move)
+                if again:
+                    v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
+                else:
+                    v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
+                alpha = min(beta, v)
+                if beta <= alpha:
+                    break
+            return v
+
 
 # Note, you should change the name of this player to be your netid
-class MancalaPlayer(Player):
+class slv398(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
-    def __init__(self, playerNum, playerType, ply=8,
+    def __init__(self, playerNum, playerType, ply=7,
                  hueristicWeights=(99, 48, 11, 49, 64, 45, 26, 71, 62, 43, 47, 69, 58, 45)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
@@ -310,67 +451,122 @@ class MancalaPlayer(Player):
         return sum([metrics[0][i] * self.hueristicWeights[i] for i in range(len(metrics[0]))]) - \
             sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))])
 
-    def _alphaBetaHelper(self, board, ply, alpha, beta, us, opponent, which_player):
-        if ply == 0 or board.gameOver():
-            return us.score(board), -1
-        if which_player == 'max':
-            v = -INFINITY
-            m = -1
-            for move in board.legalMoves(us):
-                v_temp = v
-                nb = deepcopy(board)
-                nb.makeMove(us, move)
-                if self.num == 1:
-                    if board.P1Cups[move-1] == board.NCUPS-move+1:
-                        # print 'BURP'
-                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
-                    else:
-                        # print 'BURP'
-                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
-                else:
-                    if board.P2Cups[move-1] == board.NCUPS-move+1:
-                        # if ply > 6:
-                            # print 'AI: Turn '+str(9-ply)+' Move '+str(move)
-                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
-                    else:
-                        v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
-                alpha = max(alpha, v)
-                if v_temp != v:
-                    m = move
-                if beta <= alpha:
+    def chooseMove(self, board):
+        """ Returns the next move that this player wants to make """
+        if self.type == self.HUMAN:
+            move = input("Please enter your move:")
+            while not board.legalMove(self, move):
+                print move, "is not valid"
+                move = input( "Please enter your move" )
+            return move
+        elif self.type == self.RANDOM:
+            move = choice(board.legalMoves(self))
+            print "chose move", move
+            return move
+        elif self.type == self.MINIMAX:
+            val, move = self.minimaxMove(board, self.ply)
+            print "chose move", move, " with value", val
+            return move
+        elif self.type == self.ABPRUNE:
+            val, move = self.alphaBetaMove(board, self.ply)
+            print "chose move", move, " with value", val
+            return move
+        elif self.type == self.CUSTOM:
+            # val, move = self.abPruneBonus(board, self.ply)
+            # print "chose move", move, " with value", val
+            # return move
+            MAX_PLY = 20
+            startTime = time.time()
+            move = -1
+            val = -INFINITY
+            for ply in range(7, MAX_PLY):
+                print 'RUNNING WITH DEPTH '+str(ply)
+                val_temp, move_temp, terminate = self.searchTree(board, ply, startTime)
+                if terminate:
                     break
-            return v, m
+                else:
+                    move = move_temp
+                    val = val_temp
+            print "chose move", move, " with value", val
+            return move
         else:
-            v = INFINITY
-            m = -1
-            for move in board.legalMoves(opponent):
-                v_temp = v
-                nb = deepcopy(board)
-                nb.makeMove(opponent, move)
-                if self.num == 1:
-                    if board.P2Cups[move-1] == board.NCUPS-move+1:
-                        # print 'BURP'
-                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
-                    else:
-                        # print 'BURP'
-                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
-                else:
-                    if board.P1Cups[move-1] == board.NCUPS-move+1:
-                        # if ply > 6:
-                            # print 'HUMAN: Turn '+str(9-ply)+' Move '+str(move)
-                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min')[0])
-                    else:
-                        v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max')[0])
-                alpha = min(beta, v)
-                if v_temp != v:
-                    m = move
-                if beta <= alpha:
-                    break
-            return v, m
+            print "Unknown player type"
+            return -1
 
-    def alphaBetaMove(self, board, ply):
+    def searchTree(self, board, ply, startTime):
         """ Choose a move with alpha beta pruning.  Returns (score, move) """
         # returns the score and the associated moved
-        v, m = self._alphaBetaHelper(board, ply, LOSING_SCORE, WINNING_SCORE, self,
-                                     MancalaPlayer(self.opp, self.type, self.ply), 'max')
-        return v, m
+        print 'Searching tree...'
+        move = -1
+        score = -INFINITY
+        terminate = False
+        for m in board.legalMoves(self):
+            # for each legal move
+            if ply == 0:
+                # if we're at ply 0, we need to call our eval function & return
+                return self.score(board), m
+            if board.gameOver():
+                return -1, -1  # Can't make a move, the game is over
+
+            # make a new board
+            nb = deepcopy(board)
+            again = nb.makeMove(self, m)
+            # try the move
+            opp = slv398(self.opp, self.type, self.ply, self.hueristicWeights)
+            print again
+            if again:
+                s, terminate = self._searchTreeHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max', startTime)
+            else:
+                s, terminate = self._searchTreeHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min', startTime)
+            # and see what the opponent would do next
+            if s > score:
+                # if the result is better than our best score so far, save that move,score
+                move = m
+                score = s
+        # return the best score and move so far
+        return score, move, terminate
+
+    def _searchTreeHelperBonus(self, board, ply, alpha, beta, us, opponent, which_player, startTime):
+        terminate = False
+        if time.time() > startTime + 9.8:
+            return None, True
+        if ply == 0 or board.gameOver():
+            return us.score(board), False
+        if which_player == 'max':
+            v = LOSING_SCORE
+            scoredMoves = []
+            for move in board.legalMoves(us):
+                nb = deepcopy(board)
+                again = nb.makeMove(us, move)
+                scoredMoves.append((again, move, nb))
+            for again, move, nb in sorted(scoredMoves, reverse=True):
+                if again:
+                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max', startTime)
+                    v = max(v, nodeScore)
+                else:
+                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min', startTime)
+                    v = max(v, nodeScore)
+                alpha = max(alpha, v)
+                if beta <= alpha or terminate:
+                    break
+            return v, terminate
+        else:
+            v = WINNING_SCORE
+            scoredMoves = []
+            for move in board.legalMoves(opponent):
+                nb = deepcopy(board)
+                again = nb.makeMove(opponent, move)
+                scoredMoves.append((again, move, nb))
+            for again, move, nb in sorted(scoredMoves, reverse=True):
+                if again:
+                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min', startTime)
+                    if not terminate:
+                        v = min(v, nodeScore)
+                else:
+                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max', startTime)
+                    if not terminate:
+                        v = min(v, nodeScore)
+                alpha = min(beta, v)
+                if beta <= alpha or terminate:
+                    break
+            return v, terminate

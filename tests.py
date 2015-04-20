@@ -1,22 +1,22 @@
 import unittest
 
-import Player
+import slv398
 import MancalaBoard
 
 
 class TestExample(unittest.TestCase):
 
     def testExample(self):
-        player = Player.Player(1, Player.Player.HUMAN)
-        self.assertEqual(Player.Player.HUMAN, player.type)
+        player = slv398.Player(1, slv398.Player.HUMAN)
+        self.assertEqual(slv398.Player.HUMAN, player.type)
 
 
 class TestScoring(unittest.TestCase):
 
     def setUp(self):
         self.board = MancalaBoard.MancalaBoard()
-        self.player1 = Player.MancalaPlayer(1, Player.Player.CUSTOM)
-        self.player2 = Player.MancalaPlayer(2, Player.Player.CUSTOM)
+        self.player1 = slv398.slv398(1, slv398.Player.CUSTOM)
+        self.player2 = slv398.slv398(2, slv398.Player.CUSTOM)
 
     def testScoreMancalas(self):
         self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -68,16 +68,16 @@ class TestScoring(unittest.TestCase):
         self.board.scoreCups = [46, 2]
         self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.player2.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        self.assertEqual(Player.WINNING_SCORE, self.player1.score(self.board))
-        self.assertEqual(Player.LOSING_SCORE, self.player2.score(self.board))
+        self.assertEqual(slv398.WINNING_SCORE, self.player1.score(self.board))
+        self.assertEqual(slv398.LOSING_SCORE, self.player2.score(self.board))
 
 
 class TestAlphaBeta(unittest.TestCase):
 
     def setUp(self):
         self.board = MancalaBoard.MancalaBoard()
-        self.player1 = Player.MancalaPlayer(1, Player.Player.MINIMAX, 3)
-        self.player2 = Player.MancalaPlayer(2, Player.Player.ABPRUNE, 3)
+        self.player1 = slv398.slv398(1, slv398.Player.MINIMAX, 3)
+        self.player2 = slv398.slv398(2, slv398.Player.ABPRUNE, 3)
 
     def testFirstMove(self):
         self.board.reset()
