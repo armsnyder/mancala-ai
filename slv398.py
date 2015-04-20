@@ -175,7 +175,7 @@ class Player:
                 nb = deepcopy(board)
                 nb.makeMove(opponent, move)
                 v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
-                alpha = min(beta, v)
+                beta = min(beta, v)
                 if beta <= alpha:
                     break
             return v
@@ -347,7 +347,7 @@ class Player:
                     v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 else:
                     v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
-                alpha = min(beta, v)
+                beta = min(beta, v)
                 if beta <= alpha:
                     break
             return v
@@ -386,8 +386,6 @@ class slv398(Player):
         if board.gameOver():
             if board.scoreCups[self.num-1] > board.scoreCups[self.opp-1]:
                 return WINNING_SCORE
-            elif board.scoreCups[self.num-1] < board.scoreCups[self.opp-1]:
-                return LOSING_SCORE
 
         # [0] Number of pieces in player 1's mancala
         addMetric(board.scoreCups[0], 1)
@@ -487,86 +485,59 @@ class slv398(Player):
                 else:
                     move = move_temp
                     val = val_temp
+                    if val == LOSING_SCORE or val == WINNING_SCORE:
+                        break
             print "chose move", move, " with value", val
             return move
         else:
             print "Unknown player type"
             return -1
 
-    def searchTree(self, board, ply, startTime):
-        """ Choose a move with alpha beta pruning.  Returns (score, move) """
-        # returns the score and the associated moved
-        print 'Searching tree...'
-        move = -1
-        score = -INFINITY
-        terminate = False
-        for m in board.legalMoves(self):
-            # for each legal move
-            if ply == 0:
-                # if we're at ply 0, we need to call our eval function & return
-                return self.score(board), m
-            if board.gameOver():
-                return -1, -1  # Can't make a move, the game is over
-
-            # make a new board
-            nb = deepcopy(board)
-            again = nb.makeMove(self, m)
-            # try the move
+    def searchTree(self, board, ply, startTime, alpha=-INFINITY, beta=INFINITY, opp=None, which_player='max'):
+        if not opp:
             opp = slv398(self.opp, self.type, self.ply, self.hueristicWeights)
-            print again
-            if again:
-                s, terminate = self._searchTreeHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'max', startTime)
-            else:
-                s, terminate = self._searchTreeHelperBonus(nb, ply-1, LOSING_SCORE, WINNING_SCORE, self, opp, 'min', startTime)
-            # and see what the opponent would do next
-            if s > score:
-                # if the result is better than our best score so far, save that move,score
-                move = m
-                score = s
-        # return the best score and move so far
-        return score, move, terminate
-
-    def _searchTreeHelperBonus(self, board, ply, alpha, beta, us, opponent, which_player, startTime):
         terminate = False
-        if time.time() > startTime + 9.8:
-            return None, True
         if ply == 0 or board.gameOver():
-            return us.score(board), False
+            if time.time() > startTime + 9.8:
+                terminate = True
+            return self.score(board), -1, terminate
         if which_player == 'max':
-            v = LOSING_SCORE
+            score = -INFINITY
+            move = -1
             scoredMoves = []
-            for move in board.legalMoves(us):
+            for tempMove in board.legalMoves(self):
                 nb = deepcopy(board)
-                again = nb.makeMove(us, move)
-                scoredMoves.append((again, move, nb))
-            for again, move, nb in sorted(scoredMoves, reverse=True):
-                if again:
-                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max', startTime)
-                    v = max(v, nodeScore)
-                else:
-                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min', startTime)
-                    v = max(v, nodeScore)
-                alpha = max(alpha, v)
+                again = nb.makeMove(self, tempMove)
+                scoredMoves.append((again, tempMove, nb))
+            for again, tempMove, nb in sorted(scoredMoves, reverse=True):
+                if not again:
+                    which_player = 'min'
+                tempScore, uselessMove, terminate = \
+                    self.searchTree(nb, ply-1, startTime, alpha, beta, opp, which_player)
+                if tempScore > score:
+                    score = tempScore
+                    move = tempMove
+                alpha = max(alpha, score)
                 if beta <= alpha or terminate:
                     break
-            return v, terminate
+            return score, move, terminate
         else:
-            v = WINNING_SCORE
+            score = INFINITY
+            move = -1
             scoredMoves = []
-            for move in board.legalMoves(opponent):
+            for tempMove in board.legalMoves(opp):
                 nb = deepcopy(board)
-                again = nb.makeMove(opponent, move)
-                scoredMoves.append((again, move, nb))
-            for again, move, nb in sorted(scoredMoves, reverse=True):
-                if again:
-                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min', startTime)
-                    if not terminate:
-                        v = min(v, nodeScore)
-                else:
-                    nodeScore, terminate = self._searchTreeHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max', startTime)
-                    if not terminate:
-                        v = min(v, nodeScore)
-                alpha = min(beta, v)
+                again = nb.makeMove(opp, tempMove)
+                scoredMoves.append((again, tempMove, nb))
+            for again, tempMove, nb in sorted(scoredMoves, reverse=True):
+                if not again:
+                    which_player = 'max'
+                tempScore, uselessMove, terminate = \
+                    self.searchTree(nb, ply-1, startTime, alpha, beta, opp, which_player)
+                if tempScore < score:
+                    score = tempScore
+                    move = tempMove
+                beta = min(beta, score)
                 if beta <= alpha or terminate:
                     break
-            return v, terminate
+            return score, move, terminate

@@ -1,4 +1,5 @@
 import unittest
+import time
 
 import slv398
 import MancalaBoard
@@ -69,7 +70,7 @@ class TestScoring(unittest.TestCase):
         self.player1.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.player2.hueristicWeights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         self.assertEqual(slv398.WINNING_SCORE, self.player1.score(self.board))
-        self.assertEqual(slv398.LOSING_SCORE, self.player2.score(self.board))
+        self.assertEqual(-44, self.player2.score(self.board))
 
 
 class TestAlphaBeta(unittest.TestCase):
@@ -102,3 +103,14 @@ class TestAlphaBeta(unittest.TestCase):
         player2_score, player2_move = self.player2.alphaBetaMove(self.board, 3)
         self.assertEqual(player1_move, player2_move)
         self.assertEqual(player1_score, player2_score)
+
+    def testWins(self):
+        self.board.P1Cups = [0, 0, 1, 0, 0, 0]
+        self.board.P2Cups = [5, 4, 0, 2, 1, 0]
+        self.board.scoreCups = [15, 5]
+        self.player1 = slv398.slv398(1, slv398.Player.CUSTOM)
+        self.player2 = slv398.slv398(2, slv398.Player.CUSTOM)
+        self.player1.hueristicWeights = [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+        self.player2.hueristicWeights = [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+        self.assertEqual(-1, self.player1.searchTree(self.board, 6, time.time())[0])
+        self.assertEqual(slv398.WINNING_SCORE, self.player2.searchTree(self.board, 6, time.time())[0])
