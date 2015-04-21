@@ -394,7 +394,6 @@ class slv398(Player):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
         self.hueristicWeights2 = hueristicWeights2
-        self.transpositionTable = {}
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
@@ -550,12 +549,6 @@ class slv398(Player):
             score = -INFINITY
             move = -1
             scoredMoves = []
-            t_move, t_ply = None
-            hashed = self.browns(board, opp.num)
-            try:
-                t_move, t_ply = self.transpositionTable[hashed]
-            except KeyError:
-                pass
             for tempMove in board.legalMoves(self):
                 nb = deepcopy(board)
                 again = nb.makeMove(self, tempMove)
@@ -571,19 +564,11 @@ class slv398(Player):
                 alpha = max(alpha, score)
                 if beta <= alpha or terminate:
                     break
-            if ply > t_ply:
-                self.transpositionTable[hashed] = (move, ply)
             return score, move, terminate
         else:
             score = INFINITY
             move = -1
             scoredMoves = []
-            t_move, t_ply = None
-            hashed = self.browns(board, opp.num)
-            try:
-                t_move, t_ply = self.transpositionTable[hashed]
-            except KeyError:
-                pass
             for tempMove in board.legalMoves(opp):
                 nb = deepcopy(board)
                 again = nb.makeMove(opp, tempMove)
@@ -599,33 +584,8 @@ class slv398(Player):
                 beta = min(beta, score)
                 if beta <= alpha or terminate:
                     break
-            if ply > t_ply:
-                self.transpositionTable[hashed] = (move, ply)
             return score, move, terminate
-
-    def browns(self, board, player_num):
-        """
-        Hashing function. Converts a board to a unique integer.
-        """
-        if player_num == 1:
-            our_cups = board.P1Cups
-            their_cups = board.P2Cups
-            # our_mancala = board.scoreCups[0]
-            # their_mancala = board.scoreCups[1]
-        else:
-            our_cups = board.P2Cups
-            their_cups = board.P1Cups
-            # our_mancala = board.scoreCups[1]
-            # their_mancala = board.scoreCups[0]
-        result = 0
-        for i in range(6):
-            result += our_cups[i]*(48*(i+1))
-        for i in range(6):
-            result += their_cups[i]*(48*(i+7))
-        # result += our_mancala*48*13
-        # result += their_mancala*48*14
-        return result         
-
+        
     def trashProverb(self, score):
         """ Real proverbs, used as trashtalk.
         :param score: score of move
@@ -636,7 +596,7 @@ class slv398(Player):
                        "He has put his hand in an empty hole.","Oh, Layli Goobalay! You are preferred by wise men and camels.",
                        "The seeds are for the ones who need them. Who better sows will better harvest."]
         proverbWon = "When you play mancala with God, you get no seed."
-
+    
         if score < 0:
             proverb = neg_proverbs[randint(0, (len(neg_proverbs)-1))]
         elif score == WINNING_SCORE:
