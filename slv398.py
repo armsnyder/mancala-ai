@@ -523,9 +523,7 @@ class slv398(Player):
                 # print 'RUNNING WITH DEPTH '+str(ply)
                 val_temp, move_temp, terminate = self.searchTree(board, ply, startTime)
                 if terminate:
-                    if val_temp > val:
-                        val = val_temp
-                        move = move_temp
+                    break
                 else:
                     move = move_temp
                     val = val_temp
