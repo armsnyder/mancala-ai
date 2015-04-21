@@ -388,8 +388,8 @@ class slv398(Player):
         intelligently """
 
     def __init__(self, playerNum, playerType, ply=20,
-                 hueristicWeights=(63, 67, 48, 59, 43, 56, 73, 60, 50, 37, 72, 31, 87, 29),
-                 hueristicWeights2=(86, 51, 10, 80, 56, 24, 90, 34, 51, 45, 66, 51, 31, 00)):
+                 hueristicWeights=(91, 43, 44, 71, 40, 55, 72, 39, 46, 34, 62, 42, 94, 34),
+                 hueristicWeights2=(91, 58, 58, 51, 69, 59, 76, 61, 9, 50, 38, 76, 60, 78)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
         self.hueristicWeights2 = hueristicWeights2
@@ -523,11 +523,13 @@ class slv398(Player):
                 # print 'RUNNING WITH DEPTH '+str(ply)
                 val_temp, move_temp, terminate = self.searchTree(board, ply, startTime)
                 if terminate:
-                    break
+                    if val_temp > val:
+                        val = val_temp
+                        move = move_temp
                 else:
                     move = move_temp
                     val = val_temp
-                    if val == LOSING_SCORE or val == WINNING_SCORE:
+                    if val == WINNING_SCORE:
                         break
             colorOptions = ['\033[95m', '\033[94m', '\033[92m', '\033[93m']
             if 0.6 < random() or val == WINNING_SCORE:
