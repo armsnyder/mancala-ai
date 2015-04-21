@@ -237,7 +237,8 @@ def createPlayerType(playerType):
 
 if __name__ == '__main__':
     # main()
-    p1 = slv398(1, Player.HUMAN)
-    p2 = slv398(2, Player.CUSTOM)
+    #p1 = slv398(1, Player.HUMAN)
+    p1 = slv398(1, Player.CUSTOM, 20)
+    p2 = slv398(2, Player.HUMAN)
     board = MancalaBoard()
     startGame(p1, p2)

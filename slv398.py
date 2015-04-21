@@ -25,7 +25,7 @@ class Player:
     MINIMAX = 2
     ABPRUNE = 3
     CUSTOM = 4
-    
+
     def __init__(self, playerNum, playerType, ply=0):
         """Initialize a Player with a playerNum (1 or 2), playerType (one of
         the constants such as HUMAN), and a ply (default is 0)."""
@@ -37,7 +37,7 @@ class Player:
     def __repr__(self):
         """Returns a string representation of the Player."""
         return str(self.num)
-        
+
     def minimaxMove(self, board, ply):
         """ Choose the best minimax move.  Returns (score, move) """
         move = -1
@@ -84,7 +84,7 @@ class Player:
             if s > score:
                 score = s
         return score
-    
+
     def minValue(self, board, ply, turn):
         """ Find the minimax value for the next move for this player
             at a given board configuation. Returns score."""
@@ -157,29 +157,42 @@ class Player:
         return score, move
 
     def _alphaBetaHelper(self, board, ply, alpha, beta, us, opponent, which_player):
+        """ Recursively search the tree of states with alpha-beta pruning. Returns the score of the move"""
+        #Cut off the recursion if the maximum depth or the bottom of the tree is reached.
         if ply == 0 or board.gameOver():
             return us.score(board)
+
+        #For if it is max's turn
         if which_player == 'max':
             v = -INFINITY
             for move in board.legalMoves(us):
                 nb = deepcopy(board)
                 nb.makeMove(us, move)
+
+                #Choose the highest score of all child nodes
                 v = max(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 alpha = max(alpha, v)
+
+                #Prune the tree branch
                 if beta <= alpha:
                     break
             return v
+        #For if it is min's turn
         else:
             v = INFINITY
             for move in board.legalMoves(opponent):
                 nb = deepcopy(board)
                 nb.makeMove(opponent, move)
+
+                #Choose the lowest score of all child nodes
                 v = min(v, self._alphaBetaHelper(nb, ply-1, alpha, beta, us, opponent, 'max'))
                 beta = min(beta, v)
+
+                #Prune the tree branch
                 if beta <= alpha:
                     break
             return v
-                
+
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
         if self.type == self.HUMAN:
@@ -213,7 +226,8 @@ class Player:
             return -1
 
     def minimaxBonus(self, board, ply):
-        """ Choose the best minimax move.  Returns (score, move) """
+        """ Choose the best minimax move, accounting for the fact that some moves give an extra turn.
+        Returns (score, move) """
         move = -1
         score = -INFINITY
         turn = self
@@ -229,6 +243,7 @@ class Player:
             again = nb.makeMove(self, m)
             #try the move
             opp = Player(self.opp, self.type, self.ply)
+            #Makes the next move depending on whether or not the player got an extra turn
             if again:
                 s = self.maxValueBonus(nb, ply-1, turn)
             else:
@@ -257,6 +272,7 @@ class Player:
             # Copy the board so that we don't ruin it
             nextBoard = deepcopy(board)
             again = nextBoard.makeMove(self, m)
+            #Makes the next move depending on whether or not the player got an extra turn
             if again:
                 s = self.maxValueBonus(nextBoard, ply-1, turn)
             else:
@@ -282,6 +298,7 @@ class Player:
             # Copy the board so that we don't ruin it
             nextBoard = deepcopy(board)
             again = nextBoard.makeMove(self, m)
+            #Makes the next move depending on whether or not the player got an extra turn
             if again:
                 s = self.minValueBonus(nextBoard, ply-1, turn)
             else:
@@ -323,31 +340,43 @@ class Player:
         return score, move
 
     def _alphaBetaHelperBonus(self, board, ply, alpha, beta, us, opponent, which_player):
+        """ Recursively search the tree of states with alpha-beta pruning,
+        accounting for the fact that some moves give an extra turn. Returns the score of the move"""
         if ply == 0 or board.gameOver():
             return us.score(board)
+
+        #If it is max's turn
         if which_player == 'max':
             v = -INFINITY
+            #Consider all possible legal moves
             for move in board.legalMoves(us):
                 nb = deepcopy(board)
                 again = nb.makeMove(us, move)
+                #Makes the next move depending on whether or not the player got an extra turn
                 if again:
                     v = max(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
                 else:
                     v = max(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 alpha = max(alpha, v)
+
+                #Prune the branch
                 if beta <= alpha:
                     break
             return v
         else:
             v = INFINITY
+            #Consider all possible legal moves
             for move in board.legalMoves(opponent):
                 nb = deepcopy(board)
                 again = nb.makeMove(opponent, move)
+                #Makes the next move depending on whether or not the player got an extra turn
                 if again:
                     v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'min'))
                 else:
                     v = min(v, self._alphaBetaHelperBonus(nb, ply-1, alpha, beta, us, opponent, 'max'))
                 beta = min(beta, v)
+
+                #Prune the branch
                 if beta <= alpha:
                     break
             return v
