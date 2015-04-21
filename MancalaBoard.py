@@ -4,7 +4,7 @@
 
 from random import *
 from copy import *
-from Player import *
+from slv398 import *
 
 # some constants
 INFINITY = 1.0e400
@@ -170,10 +170,8 @@ class MancalaBoard:
         print self
         if self.hasWon(currPlayer.num):
             print "Player", currPlayer, " wins!"
-            return currPlayer.num
         elif self.hasWon(waitPlayer.num):
             print "Player", waitPlayer, " wins!"
-            return waitPlayer.num
         else:
             print "Tie Game"
-            return None
+        return self.scoreCups
