@@ -387,7 +387,7 @@ class slv398(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
-    def __init__(self, playerNum, playerType, ply=20,
+    def __init__(self, playerNum, playerType, ply=49,
                  hueristicWeights=(91, 43, 44, 71, 40, 55, 72, 39, 46, 34, 62, 42, 94, 34),
                  hueristicWeights2=(91, 58, 58, 51, 69, 59, 76, 61, 9, 50, 38, 76, 60, 78)):
         Player.__init__(self, playerNum, playerType, ply)
