@@ -359,8 +359,8 @@ class slv398(Player):
         intelligently """
 
     def __init__(self, playerNum, playerType, ply=7,
-                 hueristicWeights=(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-                 hueristicWeights2=(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)):
+                 hueristicWeights=(63, 67, 48, 59, 43, 56, 73, 60, 50, 37, 72, 31, 87, 29),
+                 hueristicWeights2=(86, 51, 10, 80, 56, 24, 90, 34, 51, 45, 66, 51, 31, 00)):
         Player.__init__(self, playerNum, playerType, ply)
         self.hueristicWeights = hueristicWeights
         self.hueristicWeights2 = hueristicWeights2
@@ -372,6 +372,7 @@ class slv398(Player):
         # for evaluating the board
         # print "Calling score in MancalaPlayer"
         metrics = [[], []]
+        modifier = 0
 
         def addMetric(num, playerNum):
             """
@@ -388,6 +389,8 @@ class slv398(Player):
         if board.gameOver():
             if board.scoreCups[self.num-1] > board.scoreCups[self.opp-1]:
                 return WINNING_SCORE
+            else:
+                modifier = -1.0e5
 
         # [0] Number of pieces in player 1's mancala
         addMetric(board.scoreCups[0], 1)
@@ -450,10 +453,12 @@ class slv398(Player):
         # Return the sum of the metrics multiplied by their respective weights
         if self.num == 1:
             return sum([metrics[0][i] * self.hueristicWeights[i] for i in range(len(metrics[0]))]) - \
-                sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))])
+                sum([metrics[1][i] * self.hueristicWeights[i+len(metrics[1])] for i in range(len(metrics[1]))]) + \
+                modifier
         else:
             return sum([metrics[0][i] * self.hueristicWeights2[i] for i in range(len(metrics[0]))]) - \
-                sum([metrics[1][i] * self.hueristicWeights2[i+len(metrics[1])] for i in range(len(metrics[1]))])
+                sum([metrics[1][i] * self.hueristicWeights2[i+len(metrics[1])] for i in range(len(metrics[1]))]) + \
+                modifier
 
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
