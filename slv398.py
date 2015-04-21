@@ -11,6 +11,7 @@ from random import *
 from decimal import *
 from copy import *
 import time
+import numpy
 from MancalaBoard import *
 
 # a constant
@@ -358,6 +359,7 @@ class slv398(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
+
     def __init__(self, playerNum, playerType, ply=7,
                  hueristicWeights=(63, 67, 48, 59, 43, 56, 73, 60, 50, 37, 72, 31, 87, 29),
                  hueristicWeights2=(86, 51, 10, 80, 56, 24, 90, 34, 51, 45, 66, 51, 31, 00)):
@@ -501,6 +503,7 @@ class slv398(Player):
                     if val == LOSING_SCORE or val == WINNING_SCORE:
                         break
             print "chose move", move, " with value", val
+            # print self.trashProverb(val) prints a trashtalk sentence
             return move
         else:
             print "Unknown player type"
@@ -554,3 +557,22 @@ class slv398(Player):
                 if beta <= alpha or terminate:
                     break
             return score, move, terminate
+
+    def trashProverb(self, score):
+        """ Real proverbs, used as trashtalk.
+        :param score: score of move
+        :return: returns trashtalk proverb
+        """
+        neg_proverbs = ["We used to play mancala together, but it has come to a stop.","You win, and I win, does not make for victory in an mancala game." ]
+        pos_proverbs = ["By the time the fool has learned the game, the players have dispersed.","To play mancala, one has to know the rules.",
+                       "He has put his hand in an empty hole.","Oh, Layli Goobalay! You are preferred by wise men and camels.",
+                       "The seeds are for the ones who need them. Who better sows will better harvest."]
+        proverbWon = "When you play mancala with God, you get no seed."
+
+        if score < 0:
+            proverb = neg_proverbs[randint(0, (len(neg_proverbs)-1))]
+        elif score == WINNING_SCORE:
+            proverb = proverbWon
+        else:
+            proverb = pos_proverbs[randint(0, (len(pos_proverbs)-1))]
+        return proverb
