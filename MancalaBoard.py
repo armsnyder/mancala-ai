@@ -170,10 +170,8 @@ class MancalaBoard:
         print self
         if self.hasWon(currPlayer.num):
             print "Player", currPlayer, " wins!"
-            return currPlayer.num
         elif self.hasWon(waitPlayer.num):
             print "Player", waitPlayer, " wins!"
-            return waitPlayer.num
         else:
             print "Tie Game"
-            return None
+        return self.scoreCups

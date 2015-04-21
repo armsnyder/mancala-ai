@@ -10,11 +10,14 @@ def sortPlayers(players):
     print 'NEW ROUND'
     gamesWon = [0]*len(players)
     for p1 in range(len(players)):
-        for p2 in range(p1+1, len(players)):
-            player_1 = slv398.slv398(1, slv398.Player.ABPRUNE, 5, players[p1][:14], players[p1][14:])
-            player_2 = slv398.slv398(2, slv398.Player.ABPRUNE, 5, players[p2][:14], players[p2][14:])
+        for p2 in range(len(players)):
+            if p1 == p2:
+                continue
+            player_1 = slv398.slv398(1, slv398.Player.CUSTOM, 7, players[p1][:14], players[p1][14:])
+            player_2 = slv398.slv398(2, slv398.Player.CUSTOM, 7, players[p2][:14], players[p2][14:])
             print time.strftime('%H:%M:%S')+': Starting', p1, 'v', p2
-            threading.Thread(target=runGame, args=(player_1, p1, player_2, p2, gamesWon)).start()
+            # threading.Thread(target=runGame, args=(player_1, p1, player_2, p2, gamesWon)).start()
+            runGame(player_1, p1, player_2, p2, gamesWon)
     main_thread = threading.currentThread()
     for t in threading.enumerate():
         if t is not main_thread:
@@ -25,13 +28,8 @@ def sortPlayers(players):
 def runGame(player_1, p1, player_2, p2, gamesWon):
     game = MancalaBoard.MancalaBoard()
     winner = game.hostGame(player_1, player_2)
-    if winner == 1:
-        gamesWon[p1] += 1
-    elif winner == 2:
-        gamesWon[p2] += 1
-    else:
-        gamesWon[p1] += 0.5
-        gamesWon[p2] += 0.5
+    gamesWon[p1] += winner[0]
+    gamesWon[p2] += winner[1]
     print time.strftime('%H:%M:%S')+': Finished', p1, 'v', p2
 
 
@@ -84,15 +82,19 @@ def save(sortedPlayers):
     with open('genetic_history.txt', 'a') as f:
         f.write(time.strftime('%H:%M:%S')+'\n')
         for m in sortedPlayers:
-            line = str(round(m[0], 1)).rjust(4, ' ')+':  ['+', '.join([str(int(item)).zfill(2) for item in m[1]])+']'
+            line = str(m[0]).rjust(3, ' ')+':  ['+', '.join([str(int(item)).zfill(2) for item in m[1]])+']'
             f.write(line+'\n')
         f.write('\n')
 
 
 def main():
     p = [
-        [90, 33, 16, 97, 24, 47, 8, 65, 28, 64, 67, 23, 69, 32, 90, 33, 16, 97, 24, 47, 8, 65, 28, 64, 67, 23, 69, 32],
-        [50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50]
+        [86, 70, 32, 59, 28, 31, 72, 70, 46, 31, 92, 76, 77, 86, 78, 34, 30, 61, 57, 59, 84, 70, 59, 17, 41, 49, 43, 54],
+        [96, 73, 33, 59, 21, 30, 93, 75, 63, 31, 90, 71, 77, 74, 51, 47, 19, 39, 56, 67, 85, 73, 58, 40, 21, 76, 43, 54],
+        [85, 75, 37, 63, 25, 30, 71, 75, 64, 27, 79, 39, 85, 31, 16, 49, 19, 46, 55, 67, 56, 73, 58, 19, 27, 61, 43, 53],
+        [78, 34, 30, 61, 57, 59, 84, 70, 59, 17, 41, 49, 43, 54, 86, 70, 32, 59, 28, 31, 72, 70, 46, 31, 92, 76, 77, 86],
+        [70, 46, 31, 92, 76, 77, 86, 86, 70, 32, 59, 28, 31, 72, 70, 59, 17, 41, 49, 43, 54, 78, 34, 30, 61, 57, 59, 84],
+        [75, 63, 31, 90, 71, 77, 74, 96, 73, 33, 59, 21, 30, 93, 73, 58, 40, 21, 76, 43, 54, 51, 47, 19, 39, 56, 67, 85]
     ]
     i_min = 0
     i_max = 99
